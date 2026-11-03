@@ -1,0 +1,1017 @@
+import { Tip } from '../types';
+
+export const TIPS_DATA: Tip[] = [
+  // ==========================================
+  // PIANO - BEGINNER
+  // ==========================================
+  {
+    id: 'piano-beg-01',
+    slug: 'piano-hand-posture-holding-the-orange',
+    title: 'The "Curved Dome" Hand Posture (Holding the Orange)',
+    instrument: 'piano',
+    level: 'beginner',
+    category: 'ergonomics',
+    summary: 'Prevent tension and finger collapse by establishing the natural curved hand arch from day one.',
+    detailedExplanation: `Many beginners play with flat, rigid fingers or allow the first knuckle joint to collapse backward. This kills dexterity and causes forearm fatigue. Imagine your hand holding a tennis ball or resting gently over an orange: your wrist is level with the keybed, knuckles form a supportive arch, and you strike with the fleshy pad right near the fingertip (with the thumb playing on its side cushion). Your forearm, wrist, and hand should form a continuous, relaxed shock-absorbing lever.`,
+    practicalExercise: {
+      title: 'The "Drop and Balance" Posture Calibration',
+      steps: [
+        'Sit with feet flat, spine tall, elbows slightly above key height.',
+        'Hang your arms completely limp at your sides for 5 seconds to feel dead weight.',
+        'Lift your forearm from the elbow, keeping your hand hanging loose like a wet noodle.',
+        'Drop your fingertips gently onto Middle C-D-E-F-G (fingers 1-2-3-4-5).',
+        'Check that your knuckles are rounded upward, no joint is caving in, and wrists can float gently up and down without stiffness.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 5
+    },
+    proSecret: 'Dexterity comes from free wrist cushioning, not isolated finger muscle. If your wrist is stiff, your fingers will feel weak no matter how much you practice.',
+    commonMistake: 'Collapsing the distal knuckle (nail joint) when pressing keys, causing joint strain and uneven dynamics.',
+    musicalExample: {
+      type: 'fingering',
+      content: 'RH: 1 (C4) - 2 (D4) - 3 (E4) - 4 (F4) - 5 (G4)\nKeep wrist supple, breathe on every note drop',
+      caption: '5-finger closed position test for curved knuckle integrity'
+    },
+    tags: ['Posture', 'Hand Shape', 'Ergonomics', 'Finger Independence']
+  },
+  {
+    id: 'piano-beg-02',
+    slug: 'piano-thumb-under-mechanics',
+    title: 'Seamless Thumb-Under Mechanics for Fluid Scales',
+    instrument: 'piano',
+    level: 'beginner',
+    category: 'technique',
+    summary: 'Eliminate bumps and hitches when crossing the thumb under fingers 2 and 3 in scales.',
+    detailedExplanation: `The classic hitch in beginner piano scales occurs at the crossover (C-D-E -> F in the C major scale). Beginners often wait until finger 3 strikes to violently whip the thumb under, causing their elbow to wing out like a chicken wing. The secret is anticipatory motion: the millisecond finger 2 strikes D, the thumb is already gliding underneath the palm towards F. The forearm moves linearly along the keyboard rather than twitching sideways.`,
+    practicalExercise: {
+      title: 'The "Ghost Thumb Glide" Scale Drill',
+      steps: [
+        'Place finger 1 on C, 2 on D, 3 on E.',
+        'As you press finger 2 down, consciously glide your thumb under towards F without playing it yet.',
+        'When finger 3 plays E, release the thumb smoothly onto F.',
+        'Keep your elbow completely calm; only the thumb tucks underneath the palm arch.',
+        'Repeat both ascending (thumb under) and descending (finger 3 crosses over thumb).'
+      ],
+      tempoBpm: 72,
+      recommendedDurationMinutes: 8
+    },
+    proSecret: 'The elbow should never fly outward during a thumb cross. Keep your elbow quietly aligned behind your wrist as if moving along a smooth rail.',
+    commonMistake: 'Pivoting the entire upper body or raising the right shoulder when tucking the thumb.',
+    musicalExample: {
+      type: 'fingering',
+      content: 'C4 (1) - D4 (2) - E4 (3) -> [Tuck 1 to F4] - G4 (2) - A4 (3) - B4 (4) - C5 (5)',
+      caption: 'C Major Scale Right Hand Fingering & Tuck Pivot Point'
+    },
+    tags: ['Scales', 'Thumb Under', 'Dexterity', 'Technique']
+  },
+  {
+    id: 'piano-beg-03',
+    slug: 'piano-four-chord-wonder-inversions',
+    title: 'The 4-Chord Magic (I - V - vi - IV) Without Jumping',
+    instrument: 'piano',
+    level: 'beginner',
+    category: 'theory',
+    summary: 'Play hundreds of songs effortlessly by connecting C, G, Am, and F using smooth voice-leading inversions instead of jumping roots.',
+    detailedExplanation: `Beginners make the mistake of playing all chords in root position (jumping their left and right hands wildly up and down the keyboard from C-E-G to G-B-D to A-C-E to F-A-C). Professional pianists stay in one zone by using inversions. Notice that C major (C-E-G) and Am (A-C-E) share two common tones (C and E). Moving from C to G requires only shifting one note down by half a step if you use a 1st inversion G chord (B-D-G). This creates silky, effortless pop and classical accompaniment.`,
+    practicalExercise: {
+      title: 'Minimal Distance 4-Chord Progression',
+      steps: [
+        'Chord 1: C Major (Root Position) -> C4 - E4 - G4',
+        'Chord 2: G Major (1st Inversion) -> B3 - D4 - G4 (Notice G stays anchored!)',
+        'Chord 3: A Minor (Root Position) -> A3 - C4 - E4',
+        'Chord 4: F Major (2nd Inversion) -> A3 - C4 - F4 (C and A stay anchored!)',
+        'Practice switching between them with whole-note left-hand bass roots (C2, G2, A2, F2).'
+      ],
+      tempoBpm: 65,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'Rule of minimal movement: Look for notes shared between consecutive chords. Glue those fingers down and only move the fingers that must change.',
+    commonMistake: 'Lifting the entire hand off the keys between chord changes, breaking the musical connection.',
+    musicalExample: {
+      type: 'chord_progression',
+      content: 'I (C): C-E-G  ->  V (G/B): B-D-G  ->  vi (Am): A-C-E  ->  IV (F/A): A-C-F',
+      caption: 'Smooth voice leading for the timeless Pop/Rock 4-Chord Progression'
+    },
+    tags: ['Chords', 'Inversions', 'Voice Leading', 'Pop Piano']
+  },
+  {
+    id: 'piano-beg-04',
+    slug: 'piano-landmark-sight-reading',
+    title: 'Landmark Sight-Reading (Stop Counting Lines from Bottom)',
+    instrument: 'piano',
+    level: 'beginner',
+    category: 'theory',
+    summary: 'Read sheet music 3x faster using 4 anchor landmark notes and interval reading instead of reciting mnemonics.',
+    detailedExplanation: `Reciting "Every Good Boy Does Fine" or "All Cows Eat Grass" note-by-note is too slow for real-time playing. Professional sight-readers use Landmark Notes: Middle C (ledger line between staves), Treble G (the curl of the G clef), Bass F (between the two dots of the F clef), and High C / Low C. Once you instantly recognize these landmarks, you read the notes in between by directional interval (steps = 2nds, skips = 3rds, jumps = 4ths/5ths). Reading becomes like reading words in a book rather than spelling individual letters.`,
+    practicalExercise: {
+      title: 'Landmark Flash Calibration Drill',
+      steps: [
+        'Locate and play Bass F (F3 on the 4th line of Bass Clef).',
+        'Locate and play Middle C (C4).',
+        'Locate and play Treble G (G4 on the 2nd line of Treble Clef).',
+        'Now take a beginner piece: identify only whether each following note steps to an adjacent line/space or skips across a line.',
+        'Never look down at your hands while reading; develop your tactile spatial mapping.'
+      ],
+      tempoBpm: 50,
+      recommendedDurationMinutes: 7
+    },
+    proSecret: 'Trust your peripheral vision and tactile sense of the black keys (groups of two and three) to navigate the keyboard without looking down from the score.',
+    commonMistake: 'Bobbing your head constantly between the sheet music and your hands.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Bass F3 [4th line] <--- Middle C4 [ledger] ---> Treble G4 [2nd line]',
+      caption: 'The Holy Trinity of Grand Staff Landmark Reading'
+    },
+    tags: ['Sight Reading', 'Notation', 'Music Theory', 'Landmarks']
+  },
+  {
+    id: 'piano-beg-05',
+    slug: 'piano-damper-pedal-synchronization',
+    title: 'Damper Pedal Synchronization (Syncopated Pedaling)',
+    instrument: 'piano',
+    level: 'beginner',
+    category: 'technique',
+    summary: 'Master syncopated pedaling to achieve rich acoustic resonance without creating a muddy harmonic wash.',
+    detailedExplanation: `The most common pedal mistake is pressing the damper pedal at the exact same moment your fingers strike the new chord. This catches the dying sound of the previous chord and blurs everything into mud. The secret is "syncopated pedaling" (or late pedaling): Play the new chord on the downbeat, THEN immediately lift your foot to clear the old sound, and press the pedal back down before you release the keys. The keys hold the new chord while the pedal catches it.`,
+    practicalExercise: {
+      title: 'Down-Up-Down Pedal Coordination Formula',
+      steps: [
+        'Formula: Play chord -> Up foot -> Down foot.',
+        'Play C major chord with your hands. Hold the keys down.',
+        'Press the sustain pedal down with your right heel firmly planted.',
+        'Strike the next chord (G major): as your fingers hit the keys, instantly lift your foot up.',
+        'Quickly press the pedal back down while your fingers still hold the G major keys.',
+        'Listen carefully: the sound change should be crystal clean with zero gap and zero mud.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 8
+    },
+    proSecret: 'Keep your heel glued to the floor at all times. The pedal is operated solely by the ankle hinge, acting like an accelerator pedal.',
+    commonMistake: 'Lifting the heel off the ground or holding the pedal down through chord changes.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Beat 1: Hands strike new chord | Beat 1.2: Foot lifts up (clears) | Beat 1.5: Foot catches new chord',
+      caption: 'Syncopated Pedaling Timing Diagram'
+    },
+    tags: ['Pedal', 'Damper', 'Acoustics', 'Touch']
+  },
+
+  // ==========================================
+  // PIANO - INTERMEDIATE
+  // ==========================================
+  {
+    id: 'piano-int-01',
+    slug: 'piano-hand-independence-rhythmic-decoupling',
+    title: 'Hand Independence & Rhythmic Decoupling',
+    instrument: 'piano',
+    level: 'intermediate',
+    category: 'technique',
+    summary: 'Overcome the brain barrier where left and right hands want to play the exact same rhythm or velocity.',
+    detailedExplanation: `Hand independence is not actually two brains operating simultaneously; it is the automation of one hand so the conscious mind can direct the other. Intermediate pianists hit a wall when the left hand must play a steady ostinato pattern (like an Alberti bass or walking swing bass) while the right hand plays expressive syncopated melodies. By practicing the left hand until it requires zero visual or cognitive attention, your working memory is free to shape the right hand melody.`,
+    practicalExercise: {
+      title: 'The Table-Tap Polyrhythm Decoupler',
+      steps: [
+        'Close the piano lid or tap on a flat desk (removes pitch distraction).',
+        'Left Hand taps steady quarter notes: 1, 2, 3, 4 with an accent on beat 1.',
+        'Right Hand taps eighth notes: 1-and, 2-and, 3-and, 4-and.',
+        'Once comfortable, flip them: Right hand taps quarters, Left hand taps eighths.',
+        'Now add dynamics: LH taps fortissimo (loud) while RH taps pianissimo (whisper soft).'
+      ],
+      tempoBpm: 70,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'Never try to practice hands together at full speed until the accompaniment hand can play while you hold a casual spoken conversation.',
+    commonMistake: 'Allowing the left hand to unintentionally copy the loud dynamics of the right hand.',
+    musicalExample: {
+      type: 'notes',
+      content: 'RH (Melody): .  ♪ ♫ . ♪ ♫ (Dynamic: mp - cantabile)\nLH (Bass):   ♩   ♩   ♩   ♩   (Dynamic: pp - steady pulse)',
+      caption: 'Decoupled Dynamic Balance: Right hand sings, left hand whispers'
+    },
+    tags: ['Independence', 'Rhythm', 'Alberti Bass', 'Coordination']
+  },
+  {
+    id: 'piano-int-02',
+    slug: 'piano-two-five-one-smooth-voice-leading',
+    title: 'The ii-V-I Jazz Progression with 3rd & 7th Guide Tones',
+    instrument: 'piano',
+    level: 'intermediate',
+    category: 'theory',
+    summary: 'The holy grail of harmonic movement: mastering guide tone voice leading across Dm7 - G7 - Cmaj7.',
+    detailedExplanation: `In functional harmony and jazz, the 3rd and 7th of any chord are the "guide tones" that define its harmonic identity and emotional color (roots and 5ths provide stability but little color). Notice what happens in a ii-V-I progression in C (Dm7 -> G7 -> Cmaj7): The 7th of Dm7 (C) resolves downward by a half step to become the 3rd of G7 (B). The 3rd of Dm7 (F) stays anchored to become the 7th of G7 (F). Then the 7th of G7 (F) resolves down a half step to the 3rd of Cmaj7 (E). This smooth chromatic voice leading is why standard jazz sounds so satisfying.`,
+    practicalExercise: {
+      title: 'Guide Tone Shell Drill in C Major',
+      steps: [
+        'Left hand plays the root: D (Dm7), G (G7), C (Cmaj7).',
+        'Right hand plays only the 3rd & 7th:',
+        '- Dm7: F4 (3rd) + C5 (7th)',
+        '- G7: F4 (7th) + B4 (3rd) -> [Notice: only C moved to B!]',
+        '- Cmaj7: E4 (3rd) + B4 (7th) -> [Notice: only F moved to E!]',
+        'Listen to how full and sophisticated it sounds with just 2 notes in your right hand!'
+      ],
+      tempoBpm: 75,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'Guide tones always swap roles between chords: the 7th of one chord resolves downward by a half step to become the 3rd of the next chord.',
+    commonMistake: 'Playing full root-position block chords in the right hand that clash with the left-hand bass.',
+    musicalExample: {
+      type: 'chord_progression',
+      content: 'Dm7 (D bass | F4-C5)  --->  G7 (G bass | F4-B4)  --->  Cmaj7 (C bass | E4-B4)',
+      caption: 'Stepwise guide-tone voice leading in ii-V-I'
+    },
+    tags: ['Jazz', 'Harmony', 'ii-V-I', 'Voice Leading', 'Guide Tones']
+  },
+  {
+    id: 'piano-int-03',
+    slug: 'piano-chopin-arm-weight-drop',
+    title: 'The Chopin "Arm-Weight" Tone Production',
+    instrument: 'piano',
+    level: 'intermediate',
+    category: 'tone',
+    summary: 'Produce a singing, lyrical piano tone without hammering the keys or straining forearm tendons.',
+    detailedExplanation: `Piano keys are levers. Hitting them with isolated finger muscles produces a harsh, percussive "clack". The legendary Chopin and Neuhaus piano traditions rely on gravity and arm weight. Imagine your arm is a heavy rope suspended from your shoulder. Your fingers do not strike the keys; rather, the weight of your arm is transferred into the keybed through a firm fingertip, cushioned by a flexible, breathing wrist. To play louder, you use more arm weight, not more finger tension.`,
+    practicalExercise: {
+      title: 'The Weight Transfer Cantabile Exercise',
+      steps: [
+        'Rest finger 3 on E4.',
+        'Allow your wrist to sink slightly below key level, feeling the natural hanging weight of your entire arm.',
+        'As you initiate the tone, gently raise the wrist through the key strike in a smooth upward arc.',
+        'Transfer the weight seamlessly to finger 4 on F without lifting your hand.',
+        'Notice how round, warm, and sustained the sound is compared to a poking finger tap.'
+      ],
+      tempoBpm: 55,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'A singing piano tone (cantabile) is created by the speed and cushion of key descent, not by hitting hard from above.',
+    commonMistake: 'Locking the wrist and pounding the keys with forearm muscles, creating a bright and aggressive sound.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Shoulder (Relaxed) -> Elbow (Fluid hinge) -> Wrist (Flexible shock absorber) -> Fingertip (Firm bridge)',
+      caption: 'Kinetic Chain of the Weight-Drop Technique'
+    },
+    tags: ['Tone Production', 'Cantabile', 'Arm Weight', 'Chopin Technique']
+  },
+  {
+    id: 'piano-int-04',
+    slug: 'piano-polyrhythm-3-against-2',
+    title: 'Conquering the 3:2 Polyrhythm ("Not Dif-fi-cult")',
+    instrument: 'piano',
+    level: 'intermediate',
+    category: 'practice',
+    summary: 'Internalize 3 against 2 polyrhythms using mnemonic rhythm syllables and motor composite grids.',
+    detailedExplanation: `Polyrhythms appear everywhere from Chopin Nocturnes and Debussy to Latin jazz. When one hand plays triplet 8th notes (3 notes) while the other plays regular 8th notes (2 notes) in the same beat, beginner brains freeze. Trying to calculate math ratios while playing will derail you. Instead, memorize the composite sound. When 3 and 2 play together, they form a 4-event rhythm: Both together -> Triplet -> Duplet -> Triplet. The famous mnemonic is: "NOT DIF-FI-CULT" or "COLD CUP OF TEA".`,
+    practicalExercise: {
+      title: 'The 3:2 Mnemonic Tap Grid',
+      steps: [
+        'Beat event 1: "NOT" -> Both hands strike together.',
+        'Beat event 2: "DIF" -> Hand playing 3 strikes alone.',
+        'Beat event 3: "FI" -> Hand playing 2 strikes alone.',
+        'Beat event 4: "CULT" -> Hand playing 3 strikes alone.',
+        'Loop this rhythm on your knees while chanting: "NOT dif-fi-cult, NOT dif-fi-cult".',
+        'Once the composite rhythm feels automatic, move to the piano with RH playing C-E-G (triplets) and LH playing C-G (duplets).'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 8
+    },
+    proSecret: 'Do not count two separate pulses. Hear the single composite pattern as a swing rhythm and let muscle memory do the work.',
+    commonMistake: 'Dragging the 2nd note of the duplet to match the triplet, turning 3:2 into dotted rhythms.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Subdivision: | 1     .     2     .     3     .     |\nHand with 3: | X           X           X           |\nHand with 2: | X                 X                 |\nComposite:   | BOTH        3     2     3           |\nWord:        | NOT         DIF   FI    CULT        |',
+      caption: '3 against 2 Composite Grid Structure'
+    },
+    tags: ['Polyrhythms', 'Rhythm', 'Chopin', 'Debussy']
+  },
+
+  // ==========================================
+  // PIANO - ADVANCED
+  // ==========================================
+  {
+    id: 'piano-adv-01',
+    slug: 'piano-rootless-bill-evans-voicings',
+    title: 'Rootless Jazz Voicings (Bill Evans Style)',
+    instrument: 'piano',
+    level: 'advanced',
+    category: 'theory',
+    summary: 'Transform muddy block chords into lush modern jazz harmony by dropping the root and stacking extensions (9, 11, 13).',
+    detailedExplanation: `In a jazz trio or band, the acoustic bass player owns the root note. If the pianist plays the root in their left hand, it creates frequency clashing and robs you of available fingers. Bill Evans revolutionized jazz piano by creating "Rootless Voicings" (Type A and Type B). Type A builds from the 3rd (3 - 5 - 7 - 9 or 3 - 13 - 7 - 9). Type B builds from the 7th (7 - 9 - 3 - 13). By removing the root and 5th, your chords sound translucent, airy, and modern.`,
+    practicalExercise: {
+      title: 'Type A & Type B ii-V-I Rootless Workout',
+      steps: [
+        'Take a ii-V-I in C (Dm9 -> G13 -> Cmaj9).',
+        'Dm9 (Type A): LH plays F3 (b3) - A3 (5) - C4 (b7) - E4 (9). No D needed!',
+        'G13 (Type B): LH smoothly shifts to F3 (b7) - A3 (9) - B3 (3) - E4 (13). Minimal finger movement!',
+        'Cmaj9 (Type A): LH shifts to E3 (3) - G3 (5) - B3 (7) - D4 (9).',
+        'Play a low root with RH or a backing bass track and notice how rich this sounds.'
+      ],
+      tempoBpm: 80,
+      recommendedDurationMinutes: 15
+    },
+    proSecret: 'The 9th replaces the root, and the 13th replaces the 5th. This gives you a dense 4-note chord packed with color without finger clutter.',
+    commonMistake: 'Playing the root in the low left hand, which muddies the low-mid frequencies and ruins the voicing clarity.',
+    musicalExample: {
+      type: 'chord_progression',
+      content: 'Dm9:  F3 - A3 - C4 - E4  (b3 - 5 - b7 - 9)\nG13:  F3 - A3 - B3 - E4  (b7 - 9 - 3 - 13)\nCmaj9: E3 - G3 - B3 - D4 (3 - 5 - 7 - 9)',
+      caption: 'Bill Evans Type A/B Rootless Voicing Transition'
+    },
+    tags: ['Jazz Piano', 'Bill Evans', 'Extended Chords', 'Rootless Voicings']
+  },
+  {
+    id: 'piano-adv-02',
+    slug: 'piano-rubato-breathing-tempo',
+    title: 'The Art of Classical Rubato (Stolen Time)',
+    instrument: 'piano',
+    level: 'advanced',
+    category: 'repertoire',
+    summary: 'Express deep romantic emotion without losing structural tempo by treating the left hand as an elastic conductor.',
+    detailedExplanation: `Rubato literally translates from Italian to "robbed" or "stolen time". In romantic repertoire (Chopin, Liszt, Rachmaninoff), amateur pianists often play with erratic, random tempo fluctuations that sound disorienting. True classical rubato, as explained by Mozart and Chopin, requires a steady or slightly yielding left hand (the pulse) while the right hand (the singer) bends and phrases elastically across the bars. If you rob time by slowing down on an expressive leap, you must pay it back by moving forward into the resolution.`,
+    practicalExercise: {
+      title: 'The Elastic Rubber Band Phrasing Drill',
+      steps: [
+        'Take a lyrical passage (e.g., Chopin Nocturne in Eb, Op. 9 No. 2).',
+        'Play the left hand accompaniment with a metronome at 60 BPM until rock solid.',
+        'Now remove the metronome: on ascending melodic leaps, decelerate slightly (expand the moment).',
+        'On descending stepwise resolutions, accelerate slightly to return to the foundational tempo.',
+        'Check yourself: the total duration of an 8-bar phrase should remain approximately identical to playing it strictly in tempo.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'Think of rubato like a pendulum or an ocean wave: gravity pulls it back, momentum carries it forward. It is organic physics, never arbitrary stopping and starting.',
+    commonMistake: 'Slowing down at every difficult passage and rushing through easy ones under the guise of "expression".',
+    musicalExample: {
+      type: 'notes',
+      content: 'Phrase arch: [In Tempo] ---> [Broaden / Linger on Peak] ---> [Flow Forward into Resolution] ---> [Return to Base]',
+      caption: 'The Organic Rubato Elasticity Curve'
+    },
+    tags: ['Rubato', 'Chopin', 'Romantic Repertoire', 'Expressive Phrasing']
+  },
+  {
+    id: 'piano-adv-03',
+    slug: 'piano-modal-interchange-borrowed-chords',
+    title: 'Modal Interchange & Borrowed Chords at the Keys',
+    instrument: 'piano',
+    level: 'advanced',
+    category: 'theory',
+    summary: 'Evoke cinematic emotional shifts by borrowing chords from the parallel minor (iv minor, bVI, bVII).',
+    detailedExplanation: `When composing or arranging, staying strictly within the diatonic major scale can feel predictable. Modal interchange involves "borrowing" chords from the parallel natural minor scale while remaining in the major key. In the key of C major, borrowing the minor iv chord (Fm) introduces the poignant Ab note (minor 6th scale degree), which resolves with heartbreak down to G (5th of C). Borrowing the bVI chord (Ab major) creates an epic, wondrous cinematic lift beloved by film composers like John Williams and Hans Zimmer.`,
+    practicalExercise: {
+      title: 'The "Minor iv & bVI" Cinematic Voice Leading Drill',
+      steps: [
+        'Progression 1 (The Bittersweet iv): Cmaj7 -> Fmaj7 -> Fm6 -> Cmaj7.',
+        'Notice how the A in Fmaj7 drops to Ab in Fm6, then drops smoothly to G in Cmaj7.',
+        'Progression 2 (The Heroic bVI): C -> Abmaj7 -> Bb -> C.',
+        'Voice the Abmaj7 with LH: Ab2, RH: C4 - Eb4 - G4.',
+        'Voice the Bb with LH: Bb2, RH: D4 - F4 - Bb4.',
+        'Savor the harmonic depth of borrowing from C Aeolian.'
+      ],
+      tempoBpm: 68,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'The minor 6th degree (Ab in C major) is the single most emotional note in western harmony because it is only a half step away from the stable 5th.',
+    commonMistake: 'Resolving borrowed chords clumsily with large voice leaps rather than step-wise voice leading.',
+    musicalExample: {
+      type: 'chord_progression',
+      content: 'C (C-E-G)  ->  F (C-F-A)  ->  Fm (C-F-Ab)  ->  C (C-E-G)\nVoice line: E  ->  F  ->  Ab  ->  G',
+      caption: 'Stepwise chromatic resolution of the borrowed minor iv chord'
+    },
+    tags: ['Modal Interchange', 'Film Scoring', 'Voice Leading', 'Harmony']
+  },
+
+  // ==========================================
+  // PIANO - MASTERY / VIRTUOSO
+  // ==========================================
+  {
+    id: 'piano-mst-01',
+    slug: 'piano-half-pedaling-micro-clearing',
+    title: 'Virtuoso Half-Pedaling & Harmonic Micro-Clearing',
+    instrument: 'piano',
+    level: 'mastery',
+    category: 'technique',
+    summary: 'Sustain thunderous low bass fundamentals while wiping out muddy treble dissonance using microscopic pedal depth.',
+    detailedExplanation: `On a grand piano, the sustain pedal is not an on/off binary digital switch; it is an analog continuous physical mechanism. Grand piano dampers are heavier and thicker on the low bass strings and lighter on the treble strings. A master pianist uses "half-pedaling" (depressing the pedal only halfway down or making an ultra-quick 1/4-inch release). This micro-flick touches the treble strings just enough to silence high-frequency clutter while the heavy bass strings continue vibrating with full acoustic body.`,
+    practicalExercise: {
+      title: 'The Bass Resonance Preservation Drill',
+      steps: [
+        'Strike a loud low C1 octave with both pedals or deep sustain.',
+        'Now play quick, dissonant staccato chords in the middle register (D-F#-G#-B).',
+        'Execute a rapid "flutter flick" with your pedal foot: up 10mm and down in under 50 milliseconds.',
+        'Verify that the middle-register dissonance was silenced, but the low C1 bass is still singing clearly.',
+        'Practice calibrating your ankle resistance to control treble dampening independently of bass sustain.'
+      ],
+      tempoBpm: 50,
+      recommendedDurationMinutes: 15
+    },
+    proSecret: 'Listen for the acoustic "air" in the hall. In resonant halls, your pedal depth should rarely exceed 40-50% of the pedal travel.',
+    commonMistake: 'Treating the pedal as full down or full up, which causes either muddy harmonic collisions or jarring dry drop-offs.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Full Pedal (100% travel): Full resonance\nHalf Pedal (40-60% travel): Dampers skim strings; treble clears, bass holds\nFlutter Pedal: Rapid micro-quiver to aerate thick textures without losing line',
+      caption: 'Grand Piano Damper Engagement Calibration'
+    },
+    tags: ['Pedal Mastery', 'Grand Piano', 'Acoustics', 'Virtuoso']
+  },
+  {
+    id: 'piano-mst-02',
+    slug: 'piano-realtime-tritone-substitution',
+    title: 'Real-Time Tritone Substitution & Chromatic Reharmonization',
+    instrument: 'piano',
+    level: 'mastery',
+    category: 'theory',
+    summary: 'Substitute any dominant 7th chord with another dominant 7th a tritone away for seamless chromatic bass movement.',
+    detailedExplanation: `The dominant 7th chord (like G7: G-B-D-F) gets its unresolved tension from the tritone interval between its 3rd (B) and 7th (F). Exactly 6 semitones (a tritone) away lies Db7 (Db-F-Ab-B). Notice that Db7 shares the exact same tritone interval (F and B/Cb)! Because the core tension notes are identical, any V7 chord can be replaced by the dominant chord a tritone away (subV7). In a ii-V-I in C (Dm7 - G7 - Cmaj7), substituting Db7 for G7 transforms the bass into a silky chromatic descent: D -> Db -> C.`,
+    practicalExercise: {
+      title: 'Tritone Sub Chromatic Bass Walkdown',
+      steps: [
+        'Standard progression: Dm7 -> G7 -> Cmaj7.',
+        'Tritone substituted: Dm7 -> Db7(#11) -> Cmaj7.',
+        'Left Hand plays bass notes: D2 -> Db2 -> C2.',
+        'Right Hand plays voicings: Dm7 (C-E-F-A), Db7(#11) (B-F-G-C), Cmaj7 (B-E-G-D).',
+        'Apply this to jazz standards like "Autumn Leaves" or "All The Things You Are" to generate endless reharmonizations.'
+      ],
+      tempoBpm: 85,
+      recommendedDurationMinutes: 15
+    },
+    proSecret: 'Add the #11 to your tritone sub (G natural in Db7). It resolves straight down to E or holds as the 5th of Cmaj7 for pure modern jazz bliss.',
+    commonMistake: 'Clashing the tritone sub voicing with a singer or soloist who is singing the original unmodified dominant 5th.',
+    musicalExample: {
+      type: 'chord_progression',
+      content: 'Standard: Dm7  --->  G7        --->  Cmaj7  (Bass jumps 4th down: D -> G -> C)\nTritone:  Dm7  --->  Db7(#11)  --->  Cmaj7  (Bass descends half-steps: D -> Db -> C)',
+      caption: 'The Chromatic Bass Power of Tritone Substitution'
+    },
+    tags: ['Tritone Substitution', 'Jazz Theory', 'Reharmonization', 'Chromaticism']
+  },
+  {
+    id: 'piano-mst-03',
+    slug: 'piano-taubman-rotational-freedom',
+    title: 'Taubman Rotational Freedom & Injury Prevention',
+    instrument: 'piano',
+    level: 'mastery',
+    category: 'ergonomics',
+    summary: 'Eradicate tendon strain, speed barriers, and fatigue using forearm rotational mechanics.',
+    detailedExplanation: `Virtuoso passages (like tremolos, fast Alberti bass, and rapid arpeggios) destroy pianists who rely solely on vertical finger lifting. The pioneering work of Dorothy Taubman revealed that finger movements are naturally assisted by tiny, invisible forearm rotations (similar to turning a doorknob). When finger 5 strikes, a micro-rotation from the forearm carries the finger down with zero isolated strain. This completely eliminates tendonitis, carpal tunnel, and focal dystonia, unlocking effortless velocity.`,
+    practicalExercise: {
+      title: 'The Doorknob Micro-Rotation Drill',
+      steps: [
+        'Hold your right forearm out in front of you. Turn your hand palm-up, then palm-down (forearm rotation).',
+        'Now sit at the piano and place fingers 1 and 5 on C4 and G4.',
+        'Instead of pressing finger 5 down with finger muscle, initiate a tiny clockwise forearm rotation.',
+        'To strike finger 1, initiate a tiny counter-clockwise forearm rotation.',
+        'Gradually shrink the physical motion until it is virtually invisible to the eye, but feel the immense freedom in your forearm.'
+      ],
+      tempoBpm: 90,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'Never lift non-playing fingers high in the air. High finger lifting creates extensor co-contraction, which is the #1 cause of speed ceilings and injury.',
+    commonMistake: 'Isolating the fingers while locking the forearm and wrist into a rigid frozen position.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Tremolo C - G: Thumb plays with inward roll; 5th finger plays with outward roll. Zero finger strain.',
+      caption: 'Taubman Forearm Rotational Mechanics'
+    },
+    tags: ['Taubman Approach', 'Injury Prevention', 'Ergonomics', 'Speed Velocity']
+  },
+
+  // ==========================================
+  // GUITAR - BEGINNER
+  // ==========================================
+  {
+    id: 'gtr-beg-01',
+    slug: 'guitar-fret-edge-minimal-pressure',
+    title: 'The "Fret-Wire Edge" Rule for Zero Buzz & Finger Pain',
+    instrument: 'guitar',
+    level: 'beginner',
+    category: 'technique',
+    summary: 'Stop finger pain and buzzing instantly by placing fingertips directly behind the metal fret wire.',
+    detailedExplanation: `Beginners often complain of brutal fingertip pain and buzzing notes because they press their fingers down in the middle of the fret space or too close to the back fret. In the middle of the fret, you must apply 3x the pressure to prevent fret buzz. By placing your fingertip right up against the metal fret wire (without perching directly on top of it), the string requires only a gentle touch to produce a crystal-clear, ringing note. This saves your fingertips and lets you play for hours without soreness.`,
+    practicalExercise: {
+      title: 'The Minimal Pressure Buzz-Finder Drill',
+      steps: [
+        'Place your index finger on the 5th fret of the High E string, right behind the fret wire.',
+        'Do not press down yet; simply touch the string like a harmonic mute.',
+        'Pick the string continuously while applying microscopic increases in finger pressure.',
+        'The exact moment the dead thud turns into a clean, ringing tone—STOP pressing harder! That is your optimal playing pressure.',
+        'Notice how little pressure is actually needed compared to what you previously used.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 5
+    },
+    proSecret: 'Never press the string all the way into the wood of the fretboard. You only need the string to make firm contact with the metal fret crown.',
+    commonMistake: 'Pressing with white-knuckle force in the center of the fret, pulling the note sharp and bruising fingertips.',
+    musicalExample: {
+      type: 'tab',
+      content: 'e|---[5]---|  <-- Place finger right behind the 5th fret wire, not in middle\nB|---------|\nG|---------|',
+      caption: 'Finger positioning directly adjacent to the fret wire'
+    },
+    tags: ['Finger Pain', 'Fret Buzz', 'Ergonomics', 'Fundamentals']
+  },
+  {
+    id: 'gtr-beg-02',
+    slug: 'guitar-anchor-finger-open-chords',
+    title: 'The "Anchor Finger" Secret for Lightning Chord Changes',
+    instrument: 'guitar',
+    level: 'beginner',
+    category: 'technique',
+    summary: 'Transition between G, C, D, and Em chords seamlessly without stopping your strumming hand.',
+    detailedExplanation: `Beginner guitarists pause between every chord change to look down and reposition all four fingers one at a time. The secret to fluid rhythm guitar is finding "anchor fingers" and pivot points. When switching between G, Cadd9, and D, your ring finger (finger 3) remains firmly planted on the 3rd fret of the B string for all three chords! Because that finger never leaves the wood, it acts as a geometric anchor, allowing fingers 1 and 2 to swing effortlessly into place.`,
+    practicalExercise: {
+      title: 'The G - Cadd9 - D - Em7 Anchor Workout',
+      steps: [
+        'Form G major using fingers 3 & 4 on frets 3 of B and High E strings.',
+        'Keep fingers 3 & 4 glued to the fretboard.',
+        'Move fingers 1 & 2 down one string each: you instantly have Cadd9!',
+        'Move fingers 1 & 2 to 2nd fret of G and High E: you have Dsus4/D!',
+        'Move fingers 1 & 2 to 2nd fret of A and D: you have Em7!',
+        'Strum 4 downstrokes on each chord without lifting fingers 3 & 4 once.'
+      ],
+      tempoBpm: 65,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'Keep your strumming hand moving like a pendulum on beats 1-2-3-4. Even if your left hand is a millisecond late, the groove stays alive.',
+    commonMistake: 'Lifting all fingers completely off the fretboard on every chord change, destroying your spatial orientation.',
+    musicalExample: {
+      type: 'tab',
+      content: 'G: 3-2-0-0-[3]-[3]  -->  Cadd9: x-3-2-0-[3]-[3]  -->  Em7: 0-2-2-0-[3]-[3]\nNotice: Frets [3][3] on B and e strings NEVER move!',
+      caption: 'Anchor Finger Chord Family (Ring & Pinky locked)'
+    },
+    tags: ['Chord Changes', 'Anchor Finger', 'Open Chords', 'Rhythm Guitar']
+  },
+  {
+    id: 'gtr-beg-03',
+    slug: 'guitar-pick-grip-wrist-oscillation',
+    title: 'Pick Grip Ergonomics & The 45° Attack Angle',
+    instrument: 'guitar',
+    level: 'beginner',
+    category: 'ergonomics',
+    summary: 'Stop dropping your pick and eliminate string snagging with proper thumb-pad grip and wrist mechanics.',
+    detailedExplanation: `Gripping the guitar pick like a pencil between fingertips causes tension, pick rotation, and accidental pick drops. The correct grip places the pick on the fleshy side of the first knuckle of your index finger, clamped down with the flat pad of your thumb. Only 3 to 4 millimeters of the pick tip should protrude. Angle the pick edge at approximately 45 degrees to the string rather than flat parallel. The angled pick slices across the string with silky smoothness instead of getting hung up.`,
+    practicalExercise: {
+      title: 'The 45° Slicing Alternate Picking Drill',
+      steps: [
+        'Clamp pick between index knuckle side and thumb pad. Relax your hand into a loose fist.',
+        'Rest the edge of your hand lightly near the bridge pins (do not choke strings).',
+        'Tilt pick 45 degrees relative to string plane.',
+        'Pick Open D string Down-Up-Down-Up using pure wrist flexion (like turning a key in a lock), NOT pumping from your elbow.',
+        'Maintain an even dynamic level between downstrokes and upstrokes.'
+      ],
+      tempoBpm: 75,
+      recommendedDurationMinutes: 7
+    },
+    proSecret: 'The pick motion comes from the wrist oscillating like waving goodbye, never from the elbow hammering up and down.',
+    commonMistake: 'Holding the pick too far back, leaving a huge flexible plastic flap that slips out of your grip.',
+    musicalExample: {
+      type: 'tab',
+      content: 'D|--0---0---0---0---|\n   (v) (^) (v) (^)  <-- Down / Up alternate picking',
+      caption: 'Alternate picking with 45-degree angle attack'
+    },
+    tags: ['Pick Grip', 'Alternate Picking', 'Ergonomics', 'Picking Hand']
+  },
+  {
+    id: 'gtr-beg-04',
+    slug: 'guitar-tablature-and-fret-reading',
+    title: 'Mastering Guitar Tablature & The 6-String Grid',
+    instrument: 'guitar',
+    level: 'beginner',
+    category: 'theory',
+    summary: 'Read tabs intuitively without confusing string order or getting baffled by hammer-ons and pull-offs.',
+    detailedExplanation: `Guitar tablature displays 6 horizontal lines representing the 6 strings of your guitar. The most common beginner trap is reading the top line as the lowest/thickest string. Remember: The top line of TAB is the HIGH E string (the thinnest string closest to your feet), while the bottom line is the LOW E string (the thickest string closest to your chin). Think of it as looking down at your fretboard from above. Numbers on the lines indicate which fret to hold. When numbers are stacked vertically, strum them together as a chord.`,
+    practicalExercise: {
+      title: 'The Tab Reading Orientation Test',
+      steps: [
+        'Line 1 (Top): High e string (thinnest)',
+        'Line 2: B string',
+        'Line 3: G string',
+        'Line 4: D string',
+        'Line 5: A string',
+        'Line 6 (Bottom): Low E string (thickest)',
+        'Play this phrase from TAB: Low E fret 0 -> A string fret 2 -> D string fret 2 -> G string fret 0 (The E minor arpeggio!).'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 5
+    },
+    proSecret: 'Tab shows you where to put your fingers, but listen to audio recordings for the exact groove, feel, and swing.',
+    commonMistake: 'Inverting the strings and playing high notes on low strings because the visual diagram was read upside-down.',
+    musicalExample: {
+      type: 'tab',
+      content: 'e|-------0-------| (1st string - highest pitch)\nB|-----0---0-----|\nG|---0-------0---|\nD|---------------|\nA|---------------|\nE|-0-------------| (6th string - lowest pitch)',
+      caption: 'Arpeggiated open string tab notation'
+    },
+    tags: ['Tablature', 'Notation', 'Fretboard', 'Guitar Basics']
+  },
+
+  // ==========================================
+  // GUITAR - INTERMEDIATE
+  // ==========================================
+  {
+    id: 'gtr-int-01',
+    slug: 'guitar-f-barre-chord-breakthrough',
+    title: 'The F-Barre Chord Breakthrough (Zero Thumb Clamping)',
+    instrument: 'guitar',
+    level: 'intermediate',
+    category: 'technique',
+    summary: 'Conquer the dreaded F barre chord without crippling hand cramps by using body leverage instead of thumb pinching.',
+    detailedExplanation: `90% of guitarists struggle with the F-major barre chord because they treat their thumb and index finger like a vise clamp. This quickly fatigues the thenar muscle in your palm. The real secret: Use the weight of your arm and shoulder to pull back against the fretboard, while your right forearm gently braces against the guitar body as a counter-lever. Furthermore, roll your index finger slightly onto its bony outer edge (the thumb side), rather than using the soft, squishy inner pad where the strings get lost in the finger creases.`,
+    practicalExercise: {
+      title: 'The "Thumbless Barre" Leverage Test',
+      steps: [
+        'Take your fretting thumb completely OFF the back of the neck so it floats in the air.',
+        'Place your index finger across fret 1, slightly rotated onto its bony edge.',
+        'Gently pull back from your left shoulder blade, using the body of the guitar as a lever against your ribcage.',
+        'Strum the strings: you will hear clear ringing notes without your thumb touching the neck at all!',
+        'Now rest your thumb gently behind the neck solely for guide positioning, applying almost zero squeeze force.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'If you feel burning pain at the base of your fretting thumb, you are pinching instead of pulling with arm weight. Stop and calibrate the thumbless barre.',
+    commonMistake: 'Keeping the index finger completely flat, allowing strings 2 and 3 to land right in the soft knuckle creases and buzz.',
+    musicalExample: {
+      type: 'tab',
+      content: 'e|--1-- (Index bony edge)\nB|--1-- (Index)\nG|--2-- (Middle finger)\nD|--3-- (Pinky)\nA|--3-- (Ring finger)\nE|--1-- (Index tip)',
+      caption: 'Full F Major Barre Chord Anatomy (E-shape barre at fret 1)'
+    },
+    tags: ['Barre Chords', 'F Major', 'Ergonomics', 'Thumb Pressure']
+  },
+  {
+    id: 'gtr-int-02',
+    slug: 'guitar-caged-system-decoded',
+    title: 'The CAGED System Decoded (Unlock the Entire Fretboard)',
+    instrument: 'guitar',
+    level: 'intermediate',
+    category: 'theory',
+    summary: 'Connect 5 foundational open chord shapes to play any chord, arpeggio, or scale anywhere along the 22 frets.',
+    detailedExplanation: `The guitar neck is not random chaos. Every major chord can be played in exactly 5 shapes along the fretboard based on the open chords: C - A - G - E - D. These shapes overlap in that exact order (C leads to A, A leads to G, G leads to E, E leads to D, D wraps back to C). For example, to play a C major chord across the neck: Open C shape (frets 0-3) connects to A-shape barre at fret 3, which connects to G-shape barre at fret 5, which connects to E-shape barre at fret 8, which connects to D-shape barre at fret 10! Once you understand CAGED, you can never get lost on the neck.`,
+    practicalExercise: {
+      title: 'The C Major CAGED Highway Walkthrough',
+      steps: [
+        'Position 1: Open C Shape (Root on A string, fret 3).',
+        'Position 2: A Shape Barre at Fret 3 (Root on A string, fret 3; fretting 5-5-5 on D-G-B).',
+        'Position 3: G Shape Barre at Fret 5 (Roots on Low E fret 8 and High E fret 8).',
+        'Position 4: E Shape Barre at Fret 8 (Root on Low E fret 8, fretboard standard).',
+        'Position 5: D Shape Barre at Fret 10 (Root on D string fret 10).',
+        'Strum each shape slowly, calling out where the root note C is located in each shape.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'The root notes are your north stars. Always locate the root notes before memorizing the rest of the shape.',
+    commonMistake: 'Memorizing scale shapes blindly without knowing where the chord tones (1, 3, 5) live inside them.',
+    musicalExample: {
+      type: 'tab',
+      content: 'Shape C: x-3-2-0-1-0\nShape A: x-3-5-5-5-3\nShape G: 8-7-5-5-5-8\nShape E: 8-10-10-9-8-8\nShape D: x-x-10-12-13-12',
+      caption: 'The 5 CAGED Shapes of C Major Across the Fretboard'
+    },
+    tags: ['CAGED System', 'Fretboard Roadmap', 'Music Theory', 'Chords']
+  },
+  {
+    id: 'gtr-int-03',
+    slug: 'guitar-minor-pentatonic-box-breakout',
+    title: 'Breaking Out of the Minor Pentatonic "Box 1" Trap',
+    instrument: 'guitar',
+    level: 'intermediate',
+    category: 'repertoire',
+    summary: 'Escape repetitive box solos by linking Box 1 and Box 2 with smooth fretboard sliding techniques.',
+    detailedExplanation: `Nearly all guitarists learn Minor Pentatonic Box 1 (the famous 5-8, 5-7, 5-7, 5-7, 5-8, 5-8 pattern in A minor). But after months of playing, their solos sound like practicing a scale up and down. The solution is the "Diagonal Pentatonic Highway". Instead of staying locked in Box 1, use your ring finger to slide from the 7th fret of the G string up to the 9th fret (Box 2). This instantly propels you into the upper octave on the B and High E strings, opening up soaring blues and rock licks.`,
+    practicalExercise: {
+      title: 'The A Minor Pentatonic Diagonal Slide Lick',
+      steps: [
+        'Start in Box 1: Index finger on fret 5 of D string (G note), pick Down.',
+        'Ring finger on fret 7 of D string (A root), pick Up.',
+        'Index finger on fret 5 of G string (C note), pick Down.',
+        'Ring finger picks fret 7 of G string (D note) and immediately SLIDES up to fret 9 (E note).',
+        'Index finger plays fret 8 of B string (G note), then ring finger plays fret 10 of B string (A root).',
+        'You have smoothly traversed from fret 5 to fret 10 in one seamless melodic phrase!'
+      ],
+      tempoBpm: 75,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'Always slide with your ring finger or index finger, never with your pinky, to maintain maximum leverage for adding vibrato.',
+    commonMistake: 'Stopping the scale to look for the next box. The slide connects the boxes while sustaining sound.',
+    musicalExample: {
+      type: 'tab',
+      content: 'e|-----------------------------8-10--|\nB|------------------------8-10-------|\nG|-----------------5-7/9-------------|\nD|-----------5--7--------------------|\nA|-----5--7--------------------------|\nE|-5-8-------------------------------|',
+      caption: 'Diagonal Slide Connecting Pentatonic Box 1 and Box 2'
+    },
+    tags: ['Pentatonic', 'Soloing', 'Blues Guitar', 'Fretboard Navigation']
+  },
+  {
+    id: 'gtr-int-04',
+    slug: 'guitar-pitch-perfect-bending-vibrato',
+    title: 'Pitch-Perfect Bending & Vocal Vibrato Mechanics',
+    instrument: 'guitar',
+    level: 'intermediate',
+    category: 'tone',
+    summary: 'Never bend out of tune again: use three-finger reinforcement and wrist rotation to bend like David Gilmour.',
+    detailedExplanation: `A guitar solo sounds amateur the instant a string bend falls 20 cents flat of its target pitch. Bending with an isolated finger lacks physical power and will slip. The golden rule: When bending with your ring finger (finger 3), place your index (1) and middle (2) fingers right behind it on the same string! All three fingers push together as a single hydraulic unit. Furthermore, the bend is powered by rotating your fretting forearm and wrist (like turning a door handle), NOT by pushing out with finger joints.`,
+    practicalExercise: {
+      title: 'The Target Pitch Verification Drill',
+      steps: [
+        'Target Note: Pick fret 9 on the G string (E note) and listen closely to its exact pitch. Memorize it.',
+        'Bend Note: Place fingers 1, 2, and 3 behind fret 7 on the G string (D note).',
+        'Push the string upward using your wrist rotation until the pitch matches fret 9 (a full 1-step bend).',
+        'Pick the bent note, then immediately pick fret 9 to verify the pitches match 100% in tune.',
+        'At the peak of the bend, gently widen and narrow the wrist rotation to add a smooth, vocal vibrato.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'Bend with your ears before your hands. Sing the target pitch in your head before your fingers initiate the bend.',
+    commonMistake: 'Pushing the string with only one finger and bending from the knuckle joint, causing the string to slip under your fingernail.',
+    musicalExample: {
+      type: 'tab',
+      content: 'G|---7b9~~~--- (Bend fret 7 up to pitch of fret 9 with 3 fingers, add wide vibrato)',
+      caption: 'Full-Step Pitch Bend with Reinforcement Fingers'
+    },
+    tags: ['String Bending', 'Vibrato', 'David Gilmour', 'Tone and Pitch']
+  },
+
+  // ==========================================
+  // GUITAR - ADVANCED
+  // ==========================================
+  {
+    id: 'gtr-adv-01',
+    slug: 'guitar-triads-top-three-strings',
+    title: 'Top-3 String Triads for Pro Arranging & Rhythm Mixes',
+    instrument: 'guitar',
+    level: 'advanced',
+    category: 'theory',
+    summary: 'Cut through any band mix like a studio session pro by ditching fat barre chords in favor of 3-note triads on G-B-E.',
+    detailedExplanation: `In professional studio recordings, the bass player owns frequencies below 200 Hz, the keyboardist occupies the middle register, and big 6-string barre chords create a muddy frequency trainwreck. Studio masters like Jimi Hendrix, Steve Lukather, and Nile Rodgers play tight 3-note triads on strings 1, 2, and 3 (E, B, G). For any major or minor chord, there are only 3 inversions on these top strings: Root Position, 1st Inversion, and 2nd Inversion. They leave sonic space for vocals and sound crystal clear.`,
+    practicalExercise: {
+      title: 'Top 3 Strings G Major Triad Inversions Drill',
+      steps: [
+        'Root Position G: G string fret 12 (G), B string fret 12 (B), High E fret 10 (D).',
+        '1st Inversion G (3rd in bass): G string fret 4 (B), B string fret 3 (D), High E fret 3 (G).',
+        '2nd Inversion G (5th in bass): G string fret 7 (D), B string fret 8 (G), High E fret 7 (B).',
+        'Practice cycling through all three inversions over a G major backing track.',
+        'Notice how each inversion reveals a distinct melodic top voice.'
+      ],
+      tempoBpm: 75,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'The highest note of your triad is what the listener’s ear hears as the melody. Use triads to voice-lead your own background counter-melodies.',
+    commonMistake: 'Strumming all 6 strings when only the top 3 are fretted, producing muddy open string drones.',
+    musicalExample: {
+      type: 'tab',
+      content: 'G Major Triads (Strings G-B-e):\n1st Inv:  G: 4, B: 3, e: 3  (B-D-G)\n2nd Inv:  G: 7, B: 8, e: 7  (D-G-B)\nRoot Pos: G: 12, B: 12, e: 10 (G-B-D)',
+      caption: 'The Three Essential Triad Inversions on Top 3 Strings'
+    },
+    tags: ['Triads', 'Studio Guitar', 'Arranging', 'Inversions']
+  },
+  {
+    id: 'gtr-adv-02',
+    slug: 'guitar-economy-sweep-picking',
+    title: 'Economy & Sweep Picking Mechanics for Arpeggio Velocity',
+    instrument: 'guitar',
+    level: 'advanced',
+    category: 'technique',
+    summary: 'Glide through multi-octave arpeggios at blistering speed using the single-motion pick rake and left-hand rolling muting.',
+    detailedExplanation: `Alternate picking requires two separate picking motions per string (down, up). For arpeggios across 5 strings, this is mechanically inefficient. Sweep picking uses a single continuous downward or upward gravitational stroke—raking the pick across the strings like a broom sweeping dust off the floor. The critical barrier is left-hand muting: If your left fingers hold the notes down, it sounds like a messy strummed chord. Each left finger must fret the note for a microsecond and immediately release pressure to mute the string before the next note sounds.`,
+    practicalExercise: {
+      title: 'The 3-String A Minor Sweep Triangle',
+      steps: [
+        'Form the A minor triad on top 3 strings: G fret 9 (E), B fret 10 (C), e fret 8 (A) with High E hammer to 12 (C).',
+        'Downstroke G string, push pick through to rest against B string.',
+        'Downstroke B string, push pick through to rest against e string.',
+        'Downstroke e string, hammer-on to fret 12, then upstroke pull-off back to fret 8.',
+        'Upstroke B string fret 10, upstroke G string fret 9 in one continuous upward sweep.',
+        'Mute every string the instant your pick departs it.'
+      ],
+      tempoBpm: 80,
+      recommendedDurationMinutes: 15
+    },
+    proSecret: 'Sweep picking is 90% fretting-hand muting and only 10% picking hand. If you hear notes ringing together, slow down and master finger rolling.',
+    commonMistake: 'Treating sweep picking as individual pick strokes. The picking hand must move in one uninterrupted fluid stroke.',
+    musicalExample: {
+      type: 'tab',
+      content: 'e|---------8-h-12-p-8---------|  (Down -> Hammer -> Pull -> Up)\nB|------10------------10------|  (Down ------------------> Up)\nG|----9------------------9----|  (Down ------------------> Up)',
+      caption: '3-String Sweep Picking Archetype Pattern'
+    },
+    tags: ['Sweep Picking', 'Arpeggios', 'Velocity', 'Virtuoso Guitar']
+  },
+  {
+    id: 'gtr-adv-03',
+    slug: 'guitar-modal-target-notes-dorian-mixolydian',
+    title: 'Targeting Modal Color Tones (Dorian & Mixolydian)',
+    instrument: 'guitar',
+    level: 'advanced',
+    category: 'theory',
+    summary: 'Make your modal solos sound genuinely modal rather than generic major or minor by spotlighting characteristic notes.',
+    detailedExplanation: `Playing the D Dorian mode by simply running the C major scale from D to D does not sound like Dorian—it sounds like C major starting in the wrong place! A mode is defined by its "characteristic color note"—the single note that makes it different from standard major or minor. Dorian is Natural Minor with a RAISED 6th (in D Dorian, that is B natural). Mixolydian is Major with a FLATTENED 7th (in G Mixolydian, that is F natural). When soloing, land on that characteristic note on the strong beats to immediately evoke the modal flavor (Santana for Dorian, Southern rock / Allman Brothers for Mixolydian).`,
+    practicalExercise: {
+      title: 'The Santana Dorian Characteristic Note Spotlight',
+      steps: [
+        'Set up a backing track on Dm7 or Dm7 - G7 (Classic Dorian Vamp).',
+        'Locate the characteristic Dorian note: B natural (Fret 9 on D string, Fret 12 on B string).',
+        'Play a standard D minor pentatonic lick.',
+        'Instead of landing on the root note D, bend or resolve directly into the B natural on beat 1 of the measure.',
+        'Listen to that magical, sophisticated, soaring Santana/Pink Floyd Latin-blues color.'
+      ],
+      tempoBpm: 85,
+      recommendedDurationMinutes: 12
+    },
+    proSecret: 'Never emphasize the modal characteristic note in isolation. Contrast it by stepping from the minor 5th (A) or minor 7th (C) into the raised 6th (B).',
+    commonMistake: 'Playing scale runs indiscriminately without landing on chord tones or characteristic modal degrees on downbeats.',
+    musicalExample: {
+      type: 'tab',
+      content: 'D Dorian Lick (Highlighting B natural):\ne|------------------------|\nB|---10--12b13--10--------|\nG|------------------[12]--|  <-- Natural 6 (B note) creates the Dorian soul!\nD|------------------------|',
+      caption: 'Targeting the Characteristic Natural 6th in Dorian'
+    },
+    tags: ['Modes', 'Dorian', 'Mixolydian', 'Improvisation', 'Santana']
+  },
+
+  // ==========================================
+  // GUITAR - MASTERY / VIRTUOSO
+  // ==========================================
+  {
+    id: 'gtr-mst-01',
+    slug: 'guitar-allan-holdsworth-legato',
+    title: 'Modern Virtuoso Legato & Allan Holdsworth Symmetry',
+    instrument: 'guitar',
+    level: 'mastery',
+    category: 'technique',
+    summary: 'Achieve saxophone-like seamless speed and four-note-per-string symmetrical runs with feather-light fret touches.',
+    detailedExplanation: `Pioneered by fusion titans like Allan Holdsworth, Brett Garsed, and Shawn Lane, modern virtuoso legato eliminates the percussive click of pick strokes to produce liquid, saxophone-like melodic sheets of sound. To execute this, your fretting hand must strike the strings not with blunt force, but with extreme snap and immediate relaxation ("hammer-on from nowhere"). By using 4-note-per-string symmetrical scales or wide whole-tone stretches, you can traverse two octaves with breathtaking fluidity.`,
+    practicalExercise: {
+      title: 'The "Hammer From Nowhere" Legato Conditioning',
+      steps: [
+        'Rest your pick hand on your thigh—this entire exercise uses zero picking strokes!',
+        'Tap your index finger onto fret 7 of the G string: generate a ringing tone purely from the speed of descent.',
+        'Hammer finger 2 onto fret 9, hammer finger 3 onto fret 10, hammer finger 4 onto fret 12.',
+        'Pull-off smoothly in reverse: 12 -> 10 -> 9 -> 7.',
+        'Keep finger lift under 3mm off the fretboard to minimize travel time.',
+        'Jump to the B string and repeat with zero pick involvement.'
+      ],
+      tempoBpm: 90,
+      recommendedDurationMinutes: 15
+    },
+    proSecret: 'High action and heavy gauge strings make pure legato grueling. Virtuosos use low action (1.2mm - 1.5mm) and 9-gauge or 10-gauge strings for frictionless hammer-ons.',
+    commonMistake: 'Fretting with excessive tension, causing your hand to cramp after 3 bars of legato playing.',
+    musicalExample: {
+      type: 'tab',
+      content: 'G|--h7-h9-h10-h12-p10-p9-p7----------------|\nB|--------------------------h7-h8-h10-h12--|  (Pure fretting legato, 0 picks)',
+      caption: '4-Note-Per-String Legato Waterfall Sequence'
+    },
+    tags: ['Legato', 'Allan Holdsworth', 'Fusion Guitar', 'Virtuoso Velocity']
+  },
+  {
+    id: 'gtr-mst-02',
+    slug: 'guitar-transcription-by-ear-harmonic-intuition',
+    title: 'Instant Ear Transcription & Relative Pitch Architecture',
+    instrument: 'guitar',
+    level: 'mastery',
+    category: 'practice',
+    summary: 'Transcribe blistering solos and complex chord extensions in real time without software or tabs.',
+    detailedExplanation: `Master musicians do not guess note frets when they hear music. They hear intervals and functional degrees as distinct emotional flavors. A Major 7th interval sounds dreamy and floating; a Minor 2nd sounds like biting shark-jaw tension; a Tritone sounds unstable and seeking resolution; a #11 sounds like luminous outer-space wonder. By internalizing the 12 chromatic intervals relative to a root drone, your fingers instinctively land on the correct fret before you even consciously think about the note name.`,
+    practicalExercise: {
+      title: 'The Continuous Drone Interval Ear Mapping',
+      steps: [
+        'Set up a continuous synth or guitar drone on root note A (110 Hz).',
+        'Play each chromatic interval against the A drone on the G string:',
+        '- Fret 2 (A = Root, Unison: Home)',
+        '- Fret 3 (Bb = b9: Heavy, dissonant Spanish crunch)',
+        '- Fret 4 (B = 9: Open, hopeful, pristine)',
+        '- Fret 5 (C = b3: Melancholy minor soul)',
+        '- Fret 6 (C# = 3: Bright, proud major sunshine)',
+        '- Fret 7 (D = 11: Suspended, yearning)',
+        '- Fret 8 (D# = #11: Mysterious, floating Lydian)',
+        'Sing each interval out loud before playing it on the fretboard.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 15
+    },
+    proSecret: 'Sing what you want to play before touching the instrument. If you can sing an idea in tune, your fingers can find it in seconds.',
+    commonMistake: 'Relying exclusively on tab books and never exercising your internal auditory cortex.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Drone: A ---> Interval Colors:\nb2: Dark/Arabian | 2: Noble | b3: Blues/Grief | 3: Triumph | #4: Cosmic | 5: Power',
+      caption: 'Interval Affective Personality Chart for Instant Ear Transcription'
+    },
+    tags: ['Ear Training', 'Transcription', 'Relative Pitch', 'Mastery']
+  },
+
+  // ==========================================
+  // BOTH INSTRUMENTS - UNIVERSAL
+  // ==========================================
+  {
+    id: 'both-uni-01',
+    slug: 'both-deliberate-practice-isolation-loop',
+    title: 'The Deliberate Practice "2-Bar Isolation Loop"',
+    instrument: 'both',
+    level: 'beginner',
+    category: 'practice',
+    summary: 'Cut your practice time in half: stop playing pieces from beginning to end and surgically isolate the 2-bar snag.',
+    detailedExplanation: `Amateur musicians practice by starting at measure 1 of a piece, playing happily until they stumble at measure 14, grimace, restart at measure 1, and stumble again at measure 14. This is not practicing; it is merely rehearsing your mistakes! Professional deliberate practice demands surgery: Put your pencil down on the exact 2 beats or 2 bars where the hitch occurs. Strip away the rest of the song. Loop only those 2 bars 15 times with a metronome until it is boringly effortless, then integrate it back into the preceding measure.`,
+    practicalExercise: {
+      title: 'The 3-Step Surgical Fix Routine',
+      steps: [
+        'Identify the snag point (e.g. Bar 14 beat 3 to Bar 15 beat 1).',
+        'Isolate only that transition: do not play anything before or after.',
+        'Drop tempo to 50% speed. Play 5 clean, flawless repetitions in a row.',
+        'If you make an error on rep 4, reset the counter to zero!',
+        'Once you achieve 5 clean reps, add 1 bar before and 1 bar after, then test at target tempo.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'Practice does not make perfect; practice makes permanent. Only perfect practice makes perfect.',
+    commonMistake: 'Playing through mistakes at full speed hoping your fingers will somehow stumble into the right note next time.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Bad: [Play 1-13 OK] -> [Trip at 14] -> [Restart at 1]\nPro: [Isolate Bar 14] -> [Loop x10 clean] -> [Connect 13-14-15]',
+      caption: 'The Surgical Isolation Protocol for Rapid Mastery'
+    },
+    tags: ['Deliberate Practice', 'Efficiency', 'Habits', 'Mistake Loop']
+  },
+  {
+    id: 'both-uni-02',
+    slug: 'both-metronome-backbeat-groove',
+    title: 'Metronome Backbeat Displacement (Beats 2 & 4 Groove)',
+    instrument: 'both',
+    level: 'intermediate',
+    category: 'practice',
+    summary: 'Transform robotic metronome playing into an infectious groove by shifting the click to beats 2 and 4.',
+    detailedExplanation: `When practicing with a metronome ticking on all four beats (1, 2, 3, 4), the metronome acts like a crutch. Your brain leans on it, and your playing can become stiff, wooden, and uninspired. In jazz, funk, rock, and pop, the groove lives on the "backbeat"—beats 2 and 4 (where the drummer snaps the snare drum). Set your metronome to half tempo (e.g. 60 BPM instead of 120 BPM) and treat each click not as beat 1, but as beats 2 and 4! You are now responsible for generating the downbeats 1 and 3 yourself. Your internal pocket and groove will skyrocket.`,
+    practicalExercise: {
+      title: 'The Backbeat Mental Calibration Drill',
+      steps: [
+        'Set metronome to 50 BPM.',
+        'Do not play your instrument yet. Listen to the click: "Click... Click... Click...".',
+        'Snap your fingers with the click and count aloud: "... TWO! ... FOUR! ... TWO! ... FOUR!".',
+        'Now insert beats 1 and 3 between the clicks: "one TWO three FOUR one TWO three FOUR".',
+        'Pick up your guitar or sit at the piano: play a simple blues shuffle or chord groove feeling that click snap like a snare drum.',
+        'Feel how alive and swinging the rhythm suddenly feels!'
+      ],
+      tempoBpm: 50,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'The best musicians don’t follow the metronome; they make the metronome swing.',
+    commonMistake: 'Instinctively letting beat 1 snap to the click, pulling the rhythm back into stiff square-meter playing.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Square Metronome: [Click 1] - [Click 2] - [Click 3] - [Click 4]\nGroove Backbeat:    (You 1)   - [Click 2] -  (You 3)  - [Click 4]',
+      caption: 'Backbeat Click Displacement Architecture'
+    },
+    tags: ['Groove', 'Pocket', 'Metronome', 'Timing', 'Jazz / Funk']
+  },
+  {
+    id: 'both-uni-03',
+    slug: 'both-circle-of-fifths-navigation',
+    title: 'The Circle of Fifths: The Musician\'s Master Compass',
+    instrument: 'both',
+    level: 'intermediate',
+    category: 'theory',
+    summary: 'Decipher key signatures, chord substitutions, and modulation paths in seconds using the geometric Circle of Fifths.',
+    detailedExplanation: `The Circle of Fifths is the single most powerful visualization tool in all of music theory. Moving clockwise adds one sharp (#) per step: C (0) -> G (1#) -> D (2#) -> A (3#) -> E (4#) -> B (5#) -> F# (6#). Moving counter-clockwise adds one flat (b) per step: C (0) -> F (1b) -> Bb (2b) -> Eb (3b) -> Ab (4b) -> Db (5b) -> Gb (6b). Any key's closest harmonic neighbors are its direct left (IV chord) and direct right (V chord). Looking straight across the circle reveals the tritone interval. Master the circle and you can transpose any song instantly on piano or guitar.`,
+    practicalExercise: {
+      title: 'The Instant 3-Chord Neighbor Map Drill',
+      steps: [
+        'Pick any key on the circle (e.g. D Major).',
+        'Look at its center: D is the tonic (I chord).',
+        'Look to the right (clockwise): A Major is the dominant (V chord).',
+        'Look to the left (counter-clockwise): G Major is the subdominant (IV chord).',
+        'Look directly inside the circle: B Minor is the relative minor (vi chord).',
+        'You instantly have the complete 4-chord family for that key without writing down notes!'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 8
+    },
+    proSecret: 'Order of Sharps mnemonic: Father Charles Goes Down And Ends Battle (F, C, G, D, A, E, B). Order of Flats is reversed: Battle Ends And Down Goes Charles\' Father (B, E, A, D, G, C, F).',
+    commonMistake: 'Viewing music theory as isolated abstract rules rather than interconnected geometric patterns.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Clockwise (Fifths): C -> G -> D -> A -> E -> B -> F#\nCounter-Clockwise (Fourths): C -> F -> Bb -> Eb -> Ab -> Db -> Gb',
+      caption: 'The Dual-Direction Highway of the Circle of Fifths'
+    },
+    tags: ['Circle of Fifths', 'Music Theory', 'Transposition', 'Key Signatures']
+  },
+  {
+    id: 'both-uni-04',
+    slug: 'both-flow-state-performance-psychology',
+    title: 'Conquering Stage Fright & Entering Musical Flow State',
+    instrument: 'both',
+    level: 'advanced',
+    category: 'practice',
+    summary: 'Turn performance adrenaline into hyper-focused artistic expression using sports psychology and mental rehearsal.',
+    detailedExplanation: `When stepping onto a stage, sitting down at a recital, or hitting "record" in the studio, the sympathetic nervous system triggers the fight-or-flight response: adrenaline surges, hands get cold, heart rate spikes, and the conscious analytical brain tries to micromanage every finger movement. This micromanagement causes memory slips. Virtuosos practice "Stress Inoculation": deliberate practice under simulated physical stress (e.g., jumping jacks to elevate heart rate before running a piece) and mental visualization (rehearsing the piece note-for-note in your mind with eyes closed).`,
+    practicalExercise: {
+      title: 'The Closed-Eyes Silent Mental Rehearsal',
+      steps: [
+        'Step away from your piano or guitar. Sit in a comfortable chair and close your eyes.',
+        'Visualize placing your hands on the keys or fretboard at the start of your performance piece.',
+        'Hear every pitch, feel the tactile resistance of the keys/strings, and imagine the acoustics of the room.',
+        'If your mind hits a blank spot or cannot vividly see the next chord, that is an unmapped memory flaw!',
+        'Open your eyes, check the score/fretboard, repair that memory link, and repeat the mental performance.'
+      ],
+      tempoBpm: 60,
+      recommendedDurationMinutes: 10
+    },
+    proSecret: 'If you can play a piece flawlessly in your mental imagination from memory, you will be bulletproof on any physical stage.',
+    commonMistake: 'Believing that more finger muscle memory alone will save you from stage anxiety. Real security comes from mental structural memory.',
+    musicalExample: {
+      type: 'notes',
+      content: 'Stage Anxiety: Amygdala triggers panic -> Hands tense -> Memory slips\nFlow State: Deep diaphragmatic breathing -> Focus on sound projection -> Music flows uninterrupted',
+      caption: 'Neurology of Musical Performance Psychology'
+    },
+    tags: ['Performance Psychology', 'Stage Fright', 'Flow State', 'Mental Rehearsal']
+  }
+];
