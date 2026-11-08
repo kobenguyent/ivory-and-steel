@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { TIPS_DATA } from '../data/tipsData';
-import { CHORDS_DATA, SCALES_DATA } from '../data/chordsAndScalesData';
+import {
+  CHORDS_DATA,
+  SCALES_DATA,
+  CIRCLE_OF_FIFTHS_KEYS,
+  CHROMATIC_ROOTS,
+  SCALE_QUALITIES,
+  CHORD_QUALITIES,
+} from '../data/chordsAndScalesData';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 
 describe('Musician Curriculum Data Integrity', () => {
@@ -55,6 +62,20 @@ describe('Musician Curriculum Data Integrity', () => {
       expect(q.correctIndex).toBeGreaterThanOrEqual(0);
       expect(q.correctIndex).toBeLessThan(q.options.length);
       expect(q.explanation.length).toBeGreaterThan(15);
+    });
+  });
+
+  it('validates 12-key music theory structures and qualities', () => {
+    expect(CIRCLE_OF_FIFTHS_KEYS.length).toBe(12);
+    expect(CHROMATIC_ROOTS.length).toBe(12);
+    expect(SCALE_QUALITIES.length).toBeGreaterThanOrEqual(8);
+    expect(CHORD_QUALITIES.length).toBeGreaterThanOrEqual(8);
+
+    CIRCLE_OF_FIFTHS_KEYS.forEach((key) => {
+      expect(key.root).toBeTruthy();
+      expect(key.name).toBeTruthy();
+      expect(key.relativeMinor).toBeTruthy();
+      expect(key.majorScaleNotes.length).toBe(7);
     });
   });
 });

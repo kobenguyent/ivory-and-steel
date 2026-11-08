@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { TipLibrary } from './components/TipLibrary';
@@ -9,10 +9,34 @@ import { Metronome } from './components/Metronome';
 import { PracticeRoutine } from './components/PracticeRoutine';
 import { MusicianQuiz } from './components/MusicianQuiz';
 import { Footer } from './components/Footer';
+import {
+  CHROMATIC_ROOTS,
+  SCALE_QUALITIES,
+  getScaleNotes,
+  getGuitarScaleHighlights,
+} from './utils/musicTheory';
+import { Sparkles, Sliders } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('tips');
   const [isIvoryTheme, setIsIvoryTheme] = useState(false);
+
+  // Standalone practice guides across all 12 keys
+  const [pianoGuideRoot, setPianoGuideRoot] = useState<string>('none');
+  const [pianoGuideScale, setPianoGuideScale] = useState<string>('major');
+
+  const [guitarGuideRoot, setGuitarGuideRoot] = useState<string>('none');
+  const [guitarGuideScale, setGuitarGuideScale] = useState<string>('minor_pentatonic');
+
+  const pianoHighlightedNotes = useMemo(() => {
+    if (pianoGuideRoot === 'none') return [];
+    return getScaleNotes(pianoGuideRoot, pianoGuideScale).pianoKeys;
+  }, [pianoGuideRoot, pianoGuideScale]);
+
+  const guitarHighlights = useMemo(() => {
+    if (guitarGuideRoot === 'none') return [];
+    return getGuitarScaleHighlights(guitarGuideRoot, guitarGuideScale);
+  }, [guitarGuideRoot, guitarGuideScale]);
 
   return (
     <div
@@ -37,10 +61,52 @@ export const App: React.FC = () => {
         {activeTab === 'tips' && <TipLibrary />}
 
         {activeTab === 'piano' && (
-          <div className="space-y-8">
+          <div className="space-y-6">
+            {/* 12-Key Practice Guide Bar */}
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-amber-900/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-300">
+                <Sliders className="w-4 h-4 text-amber-400" />
+                <span className="font-bold font-serif text-sm text-slate-100">12-Key Practice Guide:</span>
+                <span className="text-slate-400">Light up scale degrees across any key while jamming</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  data-testid="piano-guide-root"
+                  value={pianoGuideRoot}
+                  onChange={(e) => setPianoGuideRoot(e.target.value)}
+                  className="bg-slate-950 text-amber-300 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs focus:ring-1 focus:ring-amber-400"
+                >
+                  <option value="none">Guide: Off (Free Play)</option>
+                  {CHROMATIC_ROOTS.map((r) => (
+                    <option key={r} value={r}>Key of {r}</option>
+                  ))}
+                </select>
+
+                {pianoGuideRoot !== 'none' && (
+                  <select
+                    data-testid="piano-guide-scale"
+                    value={pianoGuideScale}
+                    onChange={(e) => setPianoGuideScale(e.target.value)}
+                    className="bg-slate-950 text-slate-200 border border-slate-700 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-amber-400"
+                  >
+                    {SCALE_QUALITIES.map((sq) => (
+                      <option key={sq.id} value={sq.id}>{sq.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+
             <InteractivePiano
               title="Full Concert Grand Piano (2 Octaves)"
-              subtitle="Use your computer keyboard (A to K keys) or click to play notes. Real-time physical resonance modeled in Web Audio."
+              subtitle={
+                pianoGuideRoot !== 'none'
+                  ? `Active Scale Guide: ${pianoGuideRoot} ${SCALE_QUALITIES.find(q => q.id === pianoGuideScale)?.name}`
+                  : "Use your computer keyboard (A to K keys) or click to play notes. Real-time physical resonance modeled in Web Audio."
+              }
+              highlightedNotes={pianoHighlightedNotes}
+              rootNote={pianoGuideRoot !== 'none' ? pianoGuideRoot : undefined}
+              preferFlat={pianoGuideRoot.includes('b') || pianoGuideRoot === 'F'}
             />
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 text-sm text-slate-300 space-y-2">
               <h4 className="font-bold text-amber-300 font-serif text-base">
@@ -60,10 +126,50 @@ export const App: React.FC = () => {
         )}
 
         {activeTab === 'guitar' && (
-          <div className="space-y-8">
+          <div className="space-y-6">
+            {/* 12-Key Practice Guide Bar */}
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-900/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-300">
+                <Sliders className="w-4 h-4 text-emerald-400" />
+                <span className="font-bold font-serif text-sm text-slate-100">12-Key Fretboard Guide:</span>
+                <span className="text-slate-400">Highlight scale boxes & root anchors across all 15 frets</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  data-testid="guitar-guide-root"
+                  value={guitarGuideRoot}
+                  onChange={(e) => setGuitarGuideRoot(e.target.value)}
+                  className="bg-slate-950 text-emerald-300 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs focus:ring-1 focus:ring-emerald-400"
+                >
+                  <option value="none">Guide: Off (Free Play)</option>
+                  {CHROMATIC_ROOTS.map((r) => (
+                    <option key={r} value={r}>Key of {r}</option>
+                  ))}
+                </select>
+
+                {guitarGuideRoot !== 'none' && (
+                  <select
+                    data-testid="guitar-guide-scale"
+                    value={guitarGuideScale}
+                    onChange={(e) => setGuitarGuideScale(e.target.value)}
+                    className="bg-slate-950 text-slate-200 border border-slate-700 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-emerald-400"
+                  >
+                    {SCALE_QUALITIES.map((sq) => (
+                      <option key={sq.id} value={sq.id}>{sq.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+
             <InteractiveFretboard
               title="6-String Guitar Fretboard (Frets 0 - 15)"
-              subtitle="Standard Tuning (E-A-D-G-B-E). Click any fret to hear the plucked string tone."
+              subtitle={
+                guitarGuideRoot !== 'none'
+                  ? `Active Fretboard Guide: ${guitarGuideRoot} ${SCALE_QUALITIES.find(q => q.id === guitarGuideScale)?.name}`
+                  : "Standard Tuning (E-A-D-G-B-E). Click any fret to hear the plucked string tone."
+              }
+              highlights={guitarHighlights}
             />
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 text-sm text-slate-300 space-y-2">
               <h4 className="font-bold text-emerald-300 font-serif text-base">

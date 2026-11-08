@@ -1,4 +1,16 @@
 import { ChordDefinition, ScaleDefinition } from '../types';
+export {
+  CIRCLE_OF_FIFTHS_KEYS,
+  CHROMATIC_ROOTS,
+  SCALE_QUALITIES,
+  CHORD_QUALITIES,
+  getKeyInfo,
+  getScaleNotes,
+  getChordNotes,
+  getGuitarScaleHighlights,
+  getGuitarChordVoicing,
+  getDiatonicChords,
+} from '../utils/musicTheory';
 
 export const CHORDS_DATA: ChordDefinition[] = [
   // --- PIANO CHORDS ---
