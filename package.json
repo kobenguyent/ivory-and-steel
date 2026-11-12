@@ -9,7 +9,13 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "macos": "./macos/scripts/run.sh",
+    "macos:fast": "./macos/scripts/run.sh --fast",
+    "macos:build": "./macos/scripts/build_app.sh",
+    "macos:test": "./macos/scripts/run_tests.sh",
+    "macos:open": "xed macos",
+    "test:all": "./macos/scripts/run_tests.sh --all"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
