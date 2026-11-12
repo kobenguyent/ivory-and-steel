@@ -1,9 +1,12 @@
 # 🎹 Ivory & Steel 🎸
 
 > **The Modern Musician's Guide & Interactive Masterclass for Piano & Guitar**  
-> *From First Chords to Concert Stage Virtuosity.*
+> *From First Chords to Concert Stage Virtuosity — on Web & Native macOS.*
 
-[![Vitest](https://img.shields.io/badge/tests-44%20passed-brightgreen.svg)](https://github.com/)
+[![macOS Tests](https://img.shields.io/badge/macOS%20XCTest-42%20passed-success.svg)](https://developer.apple.com/xcode/swift-package-manager/)
+[![Web Tests](https://img.shields.io/badge/Web%20Vitest-57%20passed-brightgreen.svg)](https://vitest.dev/)
+[![Swift](https://img.shields.io/badge/Swift-6.0-F05138.svg)](https://swift.org/)
+[![macOS](https://img.shields.io/badge/macOS-14.0%2B%20Sonoma%20%2F%20Sequoia-black.svg)](https://www.apple.com/macos/)
 [![React 18](https://img.shields.io/badge/react-18.3.1-blue.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.7.2-3178c6.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/tailwindcss-3.4.17-38bdf8.svg)](https://tailwindcss.com/)
@@ -13,28 +16,66 @@
 
 ## 🌟 Overview
 
-**Ivory & Steel** is a musician-grade interactive web application designed to guide pianists and guitarists across all progression tiers—**Beginner**, **Intermediate**, **Advanced**, and **Mastery/Virtuoso**.
+**Ivory & Steel** is a musician-grade interactive suite for pianists and guitarists across all progression tiers—**Beginner**, **Intermediate**, **Advanced**, and **Mastery/Virtuoso**.
 
-Unlike superficial tutorials, Ivory & Steel combines anatomical ergonomics, music theory mechanics, actionable practice regimens, and interactive physical audio visualizers.
-
-Powered entirely by **client-side Web Audio synthesis**, there are zero external audio files to buffer or fail. It runs 100% offline and deploys frictionlessly to **GitHub Pages**.
+Unlike superficial tutorials, Ivory & Steel unifies anatomical ergonomics, music theory mechanics, actionable practice regimens, and interactive physical audio visualizers across two platforms:
+1. **🌐 Web Masterclass App**: Single-page React application powered by client-side Web Audio synthesis, zero external sound samples, 100% offline-ready, deployed seamlessly to GitHub Pages.
+2. **🖥️ Native macOS Studio Desktop App**: High-performance native SwiftUI application powered by AVFoundation audio DSP, 16-voice polyphonic ring allocation, discrete-time sample scheduling, CoreMIDI hardware controller support, and an Apple-inspired concert grand aesthetic.
 
 ---
 
-## ✨ Core Features
+## 🖥️ Native macOS Desktop Studio (`macos/`)
+
+The native macOS application provides zero-latency performance, hardware MIDI controller input, and dedicated practice tools engineered specifically for Apple Silicon and Intel Macs.
+
+### Key macOS Capabilities
+- **7 Dedicated Studios**:
+  - **Theory Explorer**: Universal 12-key circle of fifths astrolabe, Roman numeral chord degree badges (`I` through `vii°`), diatonic voice leading, and instant sector modulation.
+  - **Virtual Piano**: 25-key dual-octave keyboard (C4–C6) with natural acoustic ivory keys, subtle champagne gold jewel pips, and computer keyboard mapping.
+  - **Guitar Fretboard**: 15-fret rosewood fingerboard with mother-of-pearl inlays, CAGED pattern overlays, and individual plucked string resonance.
+  - **Metronome Studio**: Analog swinging pendulum physics with adjustable bob height scaled by BPM, circular tempo dial, Italian tempo presets (*Largo* to *Presto*), 6 time signatures, rhythmic subdivisions, and automated speed acceleration trainer.
+  - **Practice Routine**: Guided daily interval workouts with audio completion chimes.
+  - **Masterclass Tips**: Categorized physical and harmonic drills with bookmarks.
+  - **Level Quiz**: Comprehensive diagnostic skill assessments for piano and guitar.
+- **Menu Bar Extra Companion (`MenuBarExtraView.swift`)**:
+  - Quick-access menu bar icon with one-click metronome playback, tempo slider, volume toggle, and studio switcher shortcuts.
+- **CoreMIDI Hardware Integration (`MIDIManager.swift`)**:
+  - Plug-and-play USB & Bluetooth MIDI keyboard/fretboard support with real-time note-on/note-off visual illumination.
+- **Master Audio Engine (`AudioEngine.swift`, `VoiceNodePool.swift`)**:
+  - 44.1 kHz stereo AVFoundation graph with parametric presence EQ, soundboard body warmth, and 16-voice circular pool with 3ms micro-fadeout to eliminate clicks and speaker pops.
+
+### macOS CLI Commands
+
+```bash
+# Launch native macOS app (compiles and runs release bundle)
+npm run macos
+
+# Fast launch (sub-second launch skipping DMG generation)
+npm run macos:fast
+
+# Build and package signed IvoryAndSteel.app bundle
+npm run macos:build
+
+# Run 42-test native macOS XCTest suite
+npm run macos:test
+
+# Run full dual-platform suite (42 XCTests + 57 Vitests = 99 tests)
+npm run test:all
+
+# Open Xcode workspace
+npm run macos:open
+```
+
+---
+
+## 🌐 Web Masterclass Features
 
 ### 1. 📚 4-Tier Masterclass & Tips Library
-- **Beginner**: "Curved Dome" hand posture (holding the orange), ghost thumb-under scale glide, anchor finger chord transitions (G-Cadd9-D-Em7), fret-edge minimal pressure rule, landmark notation sight-reading.
-- **Intermediate**: Syncopated pedaling synchronization, hand decoupling & Alberti bass, the Chopin arm-weight drop, F-barre chord leverage mechanics, CAGED system fretboard mapping, 3:2 polyrhythms ("Not Dif-fi-cult"), and guide-tone ii-V-I jazz voice leading.
-- **Advanced**: Bill Evans rootless voicings (Type A/B), Allan Holdsworth liquid legato mechanics, 3-string sweep picking triangles, top-3 string triad arranging, modal target notes (Dorian & Mixolydian), and romantic rubato phrasing.
+- **Beginner**: "Curved Dome" hand posture (holding the orange), ghost thumb-under scale glide, anchor finger transitions (G-Cadd9-D-Em7), fret-edge minimal pressure rule, landmark notation sight-reading.
+- **Intermediate**: Syncopated pedaling synchronization, hand decoupling & Alberti bass, Chopin arm-weight drop, F-barre leverage mechanics, CAGED fretboard mapping, 3:2 polyrhythms ("Not Dif-fi-cult"), and guide-tone ii-V-I voice leading.
+- **Advanced**: Bill Evans rootless voicings (Type A/B), Allan Holdsworth liquid legato, 3-string sweep picking triangles, top-3 string triad arranging, modal target notes (Dorian & Mixolydian), and romantic rubato phrasing.
 - **Mastery / Virtuoso**: Acoustic grand half-pedaling & harmonic micro-clearing, real-time tritone substitution with chromatic bass descent, Taubman forearm rotational freedom, instant ear transcription, and stage fright flow state conditioning.
 - **Interactive Search & Filtering**: Filter by instrument, level, and category. Bookmark favorite tips directly to `localStorage`.
-- **Anatomy of Every Tip**:
-  - Detailed physical and harmonic explanation
-  - Step-by-step daily practice drill with recommended BPM
-  - *Pro Musician Secret*
-  - *Amateur Pitfall to Avoid*
-  - Formatted musical diagram / TAB / notation
 
 ### 2. 🎹 Interactive Virtual Grand Piano
 - 25-key dual-octave keyboard (C4 - C6).
@@ -46,16 +87,15 @@ Powered entirely by **client-side Web Audio synthesis**, there are zero external
 - 15 frets in Standard Tuning (`E-A-D-G-B-E`).
 - Modeled plucked acoustic string resonance.
 - Visual pearloid fret markers (frets 3, 5, 7, 9, 12 double-dot, 15).
-- Click any string/fret to preview pitch and check tuning.
 - Chord & scale overlays (CAGED, pentatonic boxes, modal patterns).
 
 ### 4. 🧭 Chord & Scale Theory Explorer
 - Switch seamlessly between Piano and Guitar diagrams.
 - Explore Major, Minor, Dominant 7th, Maj7, Min7, Diminished, Pentatonic, Blues, and Modes (Dorian, Harmonic Minor).
-- Listen to real-time arpeggiated strums or scale step runs with one click.
+- Real-time arpeggiated strums or scale step runs with one click.
 
 ### 5. ⏱️ Precision Backbeat Metronome
-- Accurate Web Audio API clave/click generation (high pitch accent on beat 1).
+- Sample-accurate discrete audio click generation (high-pitch downbeat accent on beat 1).
 - BPM range 30 to 260 BPM with fine +1/-1 and +5/-5 controls.
 - **Tap Tempo** calculation engine.
 - Time signatures: 2/4, 3/4, 4/4, 6/8.
@@ -78,88 +118,63 @@ Powered entirely by **client-side Web Audio synthesis**, there are zero external
 ### Prerequisites
 - Node.js `v18.0.0` or higher
 - npm `v9.0.0` or higher
+- Xcode 15+ (optional, for native macOS build)
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/<your-username>/ivory-and-steel.git
+git clone https://github.com/thienng-it/ivory-and-steel.git
 cd ivory-and-steel
 
 # 2. Install dependencies
 npm install
 
-# 3. Start local development server
+# 3. Start local development server (Web)
 npm run dev
-```
 
-Visit `http://localhost:5173` in your browser.
+# 4. Launch native macOS application (macOS only)
+npm run macos
+```
 
 ---
 
-## 🧪 Automated Testing
+## 🧪 Automated Testing (99 Tests Passing)
 
-Ivory & Steel includes a 44-test automated suite powered by **Vitest** and **React Testing Library**:
+Ivory & Steel enforces rigorous test coverage across both platforms:
 
 ```bash
-# Run tests once
-npm run test
+# Run both macOS and Web test suites
+npm run test:all
 
-# Run tests in watch mode
-npm run test:watch
+# Run Web Vitest suite only (57 tests)
+npm test
+
+# Run Native macOS XCTest suite only (42 tests)
+npm run macos:test
 ```
 
-Test coverage includes:
-- Equal temperament mathematical calculations ($440 \times 2^{(n-69)/12}$)
-- Enharmonic pitch conversions (e.g. `Db4` $\leftrightarrow$ `C#4`)
-- Web Audio API tone synthesis and mute safety
-- Virtual Piano keyboard note strikes and shortcut handling
-- Guitar fretboard string gauge rendering and fret calculation
-- Metronome timing intervals, tap tempo, and beat accents
-- Tip library search, multi-filter combinations, and bookmarking
-- Musician self-assessment scoring and level evaluation
+### Coverage Overview:
+- **12-TET Math**: $f = 440 \times 2^{(n-69)/12}$ frequency verification across all 12 keys.
+- **Acoustic Audio DSP**: Non-zero envelope floors, 3ms voice stealing without clicks, audio buffer caching, and downbeat/standard woodblock synthesis.
+- **CoreMIDI Handling**: Universal MIDI Packet (UMP) and Legacy packet parsing, device refresh safety, and note-on/off routing.
+- **Music Theory Engine**: All 12 key signatures, circle of fifths positions, diatonic chords, and enharmonic translations.
+- **Metronome Engine**: Sample-accurate interval frame math, state transitions, rapid lifecycle toggle idempotency, and tap-tempo algorithms.
+- **UI & Accessibility**: Screen-reader labels, keyboard navigation, and responsive touch/click targets.
 
 ---
 
 ## 📦 Building for Production
 
-Compile TypeScript and bundle static assets with Vite:
-
+### Web Production Bundle (Vite)
 ```bash
 npm run build
 ```
+Generates static assets in `dist/` configured with relative paths (`./`) for static hosting or GitHub Pages.
 
-The compiled static assets are generated in the `dist/` directory:
-- Zero backend dependencies
-- Relative asset paths (`base: './'`) configured for GitHub Pages sub-paths or custom apex domains.
-
----
-
-## 🌐 Deploying to GitHub Pages
-
-### Method A: Automated GitHub Actions (Recommended)
-
-1. Push your repository to GitHub:
-   ```bash
-   git remote add origin https://github.com/<your-username>/ivory-and-steel.git
-   git branch -M main
-   git push -u origin main
-   ```
-2. In your GitHub repository:
-   - Go to **Settings** > **Pages**.
-   - Under **Build and deployment** > **Source**, select **GitHub Actions**.
-3. Push to `main` (or trigger the workflow under **Actions** > **Deploy Ivory & Steel to GitHub Pages**).
-4. GitHub Actions will test, build, and deploy your site automatically!
-
-### Method B: Manual Deploy using `gh-pages`
-
+### Native macOS Application Bundle (`.app`)
 ```bash
-# Install gh-pages
-npm install -D gh-pages
-
-# Add to package.json scripts:
-# "deploy": "npm run build && gh-pages -d dist"
-
-npm run deploy
+npm run macos:build
 ```
+Compiles, code-signs, and packages `macos/build/IvoryAndSteel.app` (8.1 MB) with zero external runtime dependencies.
 
 ---
 
@@ -167,49 +182,31 @@ npm run deploy
 
 ```
 ivory-and-steel/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # GitHub Pages CI/CD workflow
-├── src/
-│   ├── components/
-│   │   ├── ChordScaleExplorer.tsx # Interactive Chord/Scale previewer
-│   │   ├── Footer.tsx             # Musician footer & links
-│   │   ├── Hero.tsx               # Catchy visual header & CTA
-│   │   ├── InteractiveFretboard.tsx # 6-string guitar neck
-│   │   ├── InteractivePiano.tsx   # 2-octave concert grand keyboard
-│   │   ├── Metronome.tsx          # Precision backbeat metronome
-│   │   ├── MusicianQuiz.tsx       # 4-tier level assessment quiz
-│   │   ├── Navbar.tsx             # Navigation, sound & theme toggles
-│   │   ├── PracticeRoutine.tsx    # Timed deliberate practice builder
-│   │   └── TipLibrary.tsx         # Filterable master tips & drills
-│   ├── data/
-│   │   ├── chordsAndScalesData.ts # Chord & scale theory mappings
-│   │   ├── quizData.ts            # Self-assessment question bank
-│   │   └── tipsData.ts            # 4-level piano & guitar curriculum
-│   ├── test/
-│   │   ├── setup.ts               # Test environment & Web Audio mocks
-│   │   ├── audio.test.ts          # Pitch math & synthesizer tests
-│   │   ├── data.test.ts           # Curriculum integrity tests
-│   │   ├── InteractivePiano.test.tsx
-│   │   ├── InteractiveFretboard.test.tsx
-│   │   ├── Metronome.test.tsx
-│   │   ├── TipLibrary.test.tsx
-│   │   ├── ChordScaleExplorer.test.tsx
-│   │   ├── PracticeRoutine.test.tsx
-│   │   ├── MusicianQuiz.test.tsx
-│   │   └── App.test.tsx
-│   ├── utils/
-│   │   └── audio.ts               # Web Audio API physical synthesizer
-│   ├── types/
-│   │   └── index.ts               # Strict TypeScript definitions
-│   ├── App.tsx                    # Main application coordinator
-│   ├── index.css                  # Custom Tailwind styles & animations
-│   └── main.tsx                   # React root entry point
-├── index.html                     # HTML5 shell & Google Fonts
-├── package.json                   # Dependencies & test scripts
-├── tailwind.config.js             # Luxury musician color theme
-├── tsconfig.json                  # TypeScript compiler options
-└── vite.config.ts                 # Vite bundler & vitest config
+├── macos/                             # Native macOS Desktop App (Swift 6 + SwiftUI)
+│   ├── Package.swift                  # Swift Package Manager manifest
+│   ├── Resources/                     # AppIcon.icns, Info.plist, Entitlements
+│   ├── Sources/IvoryAndSteel/
+│   │   ├── App/                       # App lifecycle, AppState, MenuBarExtraView
+│   │   ├── Core/Audio/                # AudioEngine, DSPMath, MetronomeEngine, VoiceNodePool
+│   │   ├── Core/Contracts/            # Swift protocols for audio, state, theory
+│   │   ├── Core/MIDI/                 # CoreMIDI Manager & device discovery
+│   │   ├── Core/Storage/              # Persistent UserDefaults bookmarking
+│   │   ├── Core/Theory/               # MusicTheoryEngine, scales, chords, keys
+│   │   └── UI/
+│   │       ├── Components/            # CircleOfFifths, NativePiano, NativeFretboard, MetronomeDial
+│   │       └── Views/                 # 7 dedicated studio views & SettingsView
+│   ├── Tests/IvoryAndSteelTests/      # 42 XCTest unit tests
+│   └── scripts/                       # run.sh, build_app.sh, run_tests.sh
+├── src/                               # Web Masterclass App (React 18 + TypeScript)
+│   ├── components/                    # InteractivePiano, InteractiveFretboard, Metronome, etc.
+│   ├── data/                          # tipsData, chordsAndScalesData, quizData
+│   ├── test/                          # 57 Vitest unit & integration tests
+│   ├── utils/audio.ts                 # Client-side Web Audio API synthesizer
+│   ├── types/                         # TypeScript interfaces
+│   ├── App.tsx                        # Main React coordinator
+│   └── index.css                      # Tailwind luxury theme styling
+├── package.json                       # Unified npm run scripts (web & macos)
+└── vite.config.ts                     # Vite bundler & test configuration
 ```
 
 ---
