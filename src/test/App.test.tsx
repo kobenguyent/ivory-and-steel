@@ -10,20 +10,30 @@ describe('App Main Component', () => {
     expect(screen.getByText(/Master the/i)).toBeInTheDocument();
   });
 
-  it('navigates to Virtual Piano tab via navbar', () => {
+  it('navigates to Virtual Piano tab and toggles 12-key scale guide', () => {
     render(<App />);
     const pianoNav = screen.getByTestId('nav-piano');
     fireEvent.click(pianoNav);
 
     expect(screen.getByText(/Full Concert Grand Piano/i)).toBeInTheDocument();
+    expect(screen.getByTestId('piano-guide-root')).toBeInTheDocument();
+
+    const rootSelect = screen.getByTestId('piano-guide-root');
+    fireEvent.change(rootSelect, { target: { value: 'Eb' } });
+    expect(screen.getByTestId('piano-guide-scale')).toBeInTheDocument();
   });
 
-  it('navigates to Guitar Fretboard tab via navbar', () => {
+  it('navigates to Guitar Fretboard tab and toggles 12-key fretboard guide', () => {
     render(<App />);
     const guitarNav = screen.getByTestId('nav-guitar');
     fireEvent.click(guitarNav);
 
     expect(screen.getByText(/6-String Guitar Fretboard/i)).toBeInTheDocument();
+    expect(screen.getByTestId('guitar-guide-root')).toBeInTheDocument();
+
+    const rootSelect = screen.getByTestId('guitar-guide-root');
+    fireEvent.change(rootSelect, { target: { value: 'A' } });
+    expect(screen.getByTestId('guitar-guide-scale')).toBeInTheDocument();
   });
 
   it('navigates to Metronome tab via navbar', () => {
