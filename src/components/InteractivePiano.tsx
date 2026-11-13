@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { audioEngine } from '../utils/audio';
-import { Music, Sparkles, Volume2, Play, Layers } from 'lucide-react';
+import { Music, Volume2, Play, Layers } from 'lucide-react';
 
 export interface KeyDef {
   note: string;
@@ -552,20 +552,6 @@ export const InteractivePiano: React.FC<InteractivePianoProps> = ({
               })}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Footer Info & Acoustic Specs */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 relative z-10 px-1">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span className="text-slate-300 font-medium">12-TET Physical Acoustic Resonance</span>
-          <span className="text-slate-600 hidden sm:inline">·</span>
-          <span className="text-slate-500 hidden sm:inline">25-Key Dual Octave Studio Range</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-slate-400">
-          <Volume2 className="w-3.5 h-3.5 text-amber-400/80" />
-          <span className="font-mono text-[11px] text-slate-400">Polyphonic 4-Part Harmonic Modeling</span>
         </div>
       </div>
     </div>

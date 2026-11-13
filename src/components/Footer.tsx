@@ -10,7 +10,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
   return (
     <footer className="mt-20 border-t border-amber-900/30 bg-[#090b0e] text-slate-400 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Info */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
@@ -96,19 +96,6 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
                 </button>
               </li>
             </ul>
-          </div>
-
-          {/* Architecture & GitHub Pages */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              GitHub Pages Ready
-            </h4>
-            <p className="text-slate-400 leading-relaxed">
-              Static production build with zero backend requirements. Audio is generated client-side via the Web Audio API oscillator chains.
-            </p>
-            <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono text-amber-300/90">
-              npm run build → ./dist
-            </div>
           </div>
         </div>
 

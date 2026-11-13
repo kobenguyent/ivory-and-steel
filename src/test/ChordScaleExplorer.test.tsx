@@ -7,7 +7,7 @@ import { audioEngine } from '../utils/audio';
 describe('ChordScaleExplorer Component', () => {
   it('renders explorer header and toggles', () => {
     render(<ChordScaleExplorer />);
-    expect(screen.getByText('Chord & Scale Theory Explorer')).toBeInTheDocument();
+    expect(screen.getByText('Chord & Scale Explorer')).toBeInTheDocument();
     expect(screen.getByTestId('toggle-piano')).toBeInTheDocument();
     expect(screen.getByTestId('toggle-guitar')).toBeInTheDocument();
     expect(screen.getByTestId('toggle-diatonic')).toBeInTheDocument();
@@ -45,9 +45,9 @@ describe('ChordScaleExplorer Component', () => {
     expect(screen.getAllByText(/3 Flats/i).length).toBeGreaterThan(0);
   });
 
-  it('interacts with the Circle of Fifths compass', () => {
+  it('interacts with the Circle of Fifths', () => {
     render(<ChordScaleExplorer />);
-    expect(screen.getByText('Circle of Fifths Compass')).toBeInTheDocument();
+    expect(screen.getByText('Circle of Fifths')).toBeInTheDocument();
 
     // Click G node on Circle of Fifths
     const gNode = screen.getByTestId('cof-node-G');
@@ -58,7 +58,7 @@ describe('ChordScaleExplorer Component', () => {
     // Toggle Circle of Fifths collapse
     const cofToggle = screen.getByTestId('toggle-circle-of-fifths');
     fireEvent.click(cofToggle);
-    expect(screen.queryByText('Circle of Fifths Compass')).not.toBeInTheDocument();
+    expect(screen.queryByText('Circle of Fifths')).not.toBeInTheDocument();
   });
 
   it('plays audio when play button is clicked', () => {

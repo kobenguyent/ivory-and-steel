@@ -15,7 +15,7 @@ import {
   getScaleNotes,
   getGuitarScaleHighlights,
 } from './utils/musicTheory';
-import { Sparkles, Sliders } from 'lucide-react';
+import { Sliders } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('tips');

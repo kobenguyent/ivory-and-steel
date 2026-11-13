@@ -51,17 +51,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-serif font-black text-2xl tracking-tight text-white group-hover:text-amber-300 transition-colors">
-                  Ivory & Steel
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
-                  Pro
-                </span>
-              </div>
-              <p className="text-[11px] font-medium text-slate-400 tracking-wide">
-                Piano & Guitar Masterclass • Beginner to Virtuoso
-              </p>
+              <span className="font-serif font-bold text-2xl tracking-tight text-white group-hover:text-amber-300 transition-colors">
+                Ivory & Steel
+              </span>
             </div>
           </div>
 

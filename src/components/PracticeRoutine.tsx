@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PracticeRoutineBlock, DifficultyLevel, Instrument } from '../types';
 import { audioEngine } from '../utils/audio';
-import { Play, Pause, RotateCcw, CheckCircle2, Clock, Sparkles } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle2, Clock } from 'lucide-react';
 
 const PRESET_ROUTINES: {
   name: string;
@@ -343,10 +343,9 @@ export const PracticeRoutine: React.FC = () => {
             );
           })}
 
-          <div className="mt-4 p-3 rounded-lg bg-amber-950/20 border border-amber-600/30 text-xs text-amber-200/90 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="mt-4 p-3 rounded-lg bg-amber-950/20 border border-amber-600/30 text-xs text-amber-200/90">
             <span>
-              <strong>Rule of Deliberate Practice:</strong> If you lose focus during a block, pause the timer and take 3 deep diaphragmatic breaths before resuming.
+              <strong>Focus cue:</strong> If you lose focus during a block, pause the timer and take three slow breaths before resuming.
             </span>
           </div>
         </div>

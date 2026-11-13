@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CIRCLE_OF_FIFTHS_KEYS, getKeyInfo } from '../utils/musicTheory';
 import { audioEngine } from '../utils/audio';
-import { Compass, Sparkles, ArrowRight, ArrowLeft, Home, Volume2 } from 'lucide-react';
+import { Compass, ArrowRight, ArrowLeft, Home, Volume2 } from 'lucide-react';
 
 interface CircleOfFifthsProps {
   selectedRoot: string;
@@ -87,21 +87,17 @@ export const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl sm:text-2xl font-serif font-bold text-slate-100">
-                Circle of Fifths Compass
+                Circle of Fifths
               </h3>
-              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
-                Harmonic Navigation
-              </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Western music's circular roadmap of key signatures, modulation, and dominant-tonic relationships.
+              Key signatures, relative minors, and dominant–tonic relationships.
             </p>
           </div>
         </div>
 
-        <div className="text-xs text-slate-400 flex items-center gap-2 self-start sm:self-auto bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Click any key on the wheel to transpose instantly</span>
+        <div className="text-xs text-slate-400 self-start sm:self-auto bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
+          Click any key to transpose
         </div>
       </div>
 

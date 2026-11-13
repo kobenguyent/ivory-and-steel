@@ -20,7 +20,6 @@ import { audioEngine } from '../utils/audio';
 import {
   Play,
   Compass,
-  Sparkles,
   Music2,
   Layers,
   Volume2,
@@ -321,16 +320,11 @@ export const ChordScaleExplorer: React.FC = () => {
                 <Compass className="w-5 h-5" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-slate-100 tracking-tight">
-                Chord & Scale Theory Explorer
+                Chord & Scale Explorer
               </h2>
-              <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold shadow-sm">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                Universal 12 Keys
-              </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-2xl leading-relaxed">
-              Master harmony, modal scales, and chord voicings across all 12 musical keys with
-              instant real-time acoustic synthesis and interactive instrument fretboards.
+              Explore harmony, modal scales, and voicings across all 12 keys.
             </p>
           </div>
 
@@ -384,9 +378,8 @@ export const ChordScaleExplorer: React.FC = () => {
         {/* 12-Key Chromatic Selector Ribbon */}
         <div className="pt-5 pb-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-semibold flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              Select Root Key Center:
+            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-semibold">
+              Root Key
             </span>
             <div className="flex items-center gap-2 text-xs font-mono">
               <span className="text-slate-400">Active Key:</span>
@@ -485,7 +478,7 @@ export const ChordScaleExplorer: React.FC = () => {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Layers className="w-3.5 h-3.5" />
                 <span>Chord Voicings</span>
               </button>
             </div>
@@ -774,8 +767,7 @@ export const ChordScaleExplorer: React.FC = () => {
               <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/90 shadow-inner">
                 {/* Left: Dropdown with optgroups & Steppers */}
                 <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
-                  <span className="text-xs font-semibold text-sky-400 shrink-0 flex items-center gap-1.5 font-mono">
-                    <Sparkles className="w-3.5 h-3.5" />
+                  <span className="text-xs font-semibold text-sky-400 shrink-0 font-mono">
                     Chord:
                   </span>
 
