@@ -31,58 +31,65 @@ public enum MetronomePresets {
 public struct MetronomeDialView: View {
     @Binding public var bpm: Double
     @Binding public var isRunning: Bool
+    public var beatsPerBar: Int
+    public var beatTick: Int
     public let onBpmChanged: ((Double) -> Void)?
     public let onToggleRunning: (() -> Void)?
     public let onTickSound: ((Bool) -> Void)?
-    
-    @State private var timeSignatureBeats: Int = 4
+
     @State private var currentBeat: Int = 0
     @State private var pulseScale: CGFloat = 1.0
     @State private var pulseOpacity: Double = 0.0
     @State private var pendulumAngle: Double = 0.0
     @State private var tapTimes: [Date] = []
-    
+
     public init(
         bpm: Binding<Double>,
         isRunning: Binding<Bool>,
+        beatsPerBar: Int = 4,
+        beatTick: Int = 0,
         onBpmChanged: ((Double) -> Void)? = nil,
         onToggleRunning: (() -> Void)? = nil,
         onTickSound: ((Bool) -> Void)? = nil
     ) {
         self._bpm = bpm
         self._isRunning = isRunning
+        self.beatsPerBar = max(1, beatsPerBar)
+        self.beatTick = beatTick
         self.onBpmChanged = onBpmChanged
         self.onToggleRunning = onToggleRunning
         self.onTickSound = onTickSound
     }
-    
-    public var body: some View {
-        VStack(spacing: 0) {
-            headerBar
-            
-            HStack(alignment: .center, spacing: 24) {
-                // Left: Analog Swinging Pendulum with Adjustable Bob
-                analogPendulumCard
-                    .frame(width: 220, height: 290)
-                
-                // Center: Digital Circular Arc Tempo Dial & Big Controls
-                circularDialCard
-                    .frame(maxWidth: .infinity)
-                
-                // Right: Time Signatures & Tempo Markings Presets
-                presetsAndSignaturesCard
-                    .frame(width: 240)
-            }
-            .padding(18)
+
+    private var activeBeatIndex: Int {
+        if beatTick > 0 {
+            return (beatTick - 1) % max(1, beatsPerBar)
         }
+        return currentBeat % max(1, beatsPerBar)
+    }
+
+    public var body: some View {
+        HStack(alignment: .center, spacing: 24) {
+            // Left: Swinging Pendulum
+            analogPendulumCard
+                .frame(width: 210, height: 290)
+
+            // Right: Circular Arc Dial, Steppers, Beat Indicators & Start/Tap Controls
+            circularDialCard
+                .frame(maxWidth: .infinity)
+        }
+        .padding(18)
         .background(Color.musicianEbony)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.musicianGold.opacity(0.35), lineWidth: 1)
+                .strokeBorder(Color.white.opacity(0.07), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.6), radius: 18, x: 0, y: 10)
-        // Metronome Beat Timer Loop
+        .shadow(color: Color.black.opacity(0.45), radius: 14, x: 0, y: 8)
+        .onChange(of: beatTick) { _, newTick in
+            guard isRunning, newTick > 0 else { return }
+            triggerPulseRing()
+        }
         .task(id: isRunning) {
             guard isRunning else {
                 currentBeat = 0
@@ -92,73 +99,11 @@ public struct MetronomeDialView: View {
             await runMetronomeLoop()
         }
     }
-    
-    // MARK: - Header Bar
-    
-    private var headerBar: some View {
-        HStack {
-            HStack(spacing: 8) {
-                Image(systemName: "metronome.fill")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color.musicianGold)
-                    .padding(6)
-                    .background(Color.musicianGold.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text("Precision Studio Metronome")
-                            .font(.system(size: 17, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianIvory)
-                        
-                        Text(isRunning ? "ACTIVE" : "STANDBY")
-                            .font(.system(size: 9.5, weight: .bold, design: .monospaced))
-                            .foregroundColor(isRunning ? Color.musicianEbony : Color.gray)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(isRunning ? Color.musicianGold : Color.gray.opacity(0.2))
-                            .clipShape(Capsule())
-                    }
-                    
-                    Text("Acoustic woodblock click · Low-jitter timer · Analog pendulum physics.")
-                        .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color.gray)
-                }
-            }
-            
-            Spacer()
-            
-            // Tap Tempo Button
-            Button(action: handleTapTempo) {
-                HStack(spacing: 4) {
-                    Image(systemName: "hand.tap.fill")
-                        .font(.system(size: 10))
-                    Text("TAP TEMPO")
-                        .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .foregroundColor(Color.musicianGoldLight)
-                .background(Color.musicianSurface)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.musicianGold.opacity(0.4), lineWidth: 0.8))
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.musicianSurface.opacity(0.95))
-    }
-    
+
     // MARK: - Analog Swinging Pendulum Card
-    
+
     private var analogPendulumCard: some View {
         VStack(spacing: 6) {
-            Text("ANALOG PENDULUM")
-                .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                .foregroundColor(Color.gray)
-                .tracking(0.8)
-            
             GeometryReader { proxy in
                 let w = proxy.size.width
                 let h = proxy.size.height
@@ -258,13 +203,13 @@ public struct MetronomeDialView: View {
                 // Expanding Luminous Pulse Ring on Each Beat
                 Circle()
                     .strokeBorder(
-                        currentBeat == 0 ? Color.musicianGold : Color.white.opacity(0.4),
+                        activeBeatIndex == 0 ? Color.musicianGold : Color.white.opacity(0.4),
                         lineWidth: 1.5
                     )
-                    .frame(width: 170, height: 170)
+                    .frame(width: 162, height: 162)
                     .scaleEffect(pulseScale)
                     .opacity(pulseOpacity)
-                
+
                 // Digital Arc Vector Track
                 GeometryReader { proxy in
                     let size = min(proxy.size.width, proxy.size.height)
@@ -274,9 +219,8 @@ public struct MetronomeDialView: View {
                     let maxAngle: Double = 405
                     let fraction = (bpm - 30.0) / (260.0 - 30.0)
                     let currentAngle = minAngle + fraction * (maxAngle - minAngle)
-                    
+
                     ZStack {
-                        // Background Arc Track
                         Path { path in
                             path.addArc(
                                 center: center,
@@ -287,8 +231,7 @@ public struct MetronomeDialView: View {
                             )
                         }
                         .stroke(Color.musicianCharcoal, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                        
-                        // Active Progress Arc
+
                         Path { path in
                             path.addArc(
                                 center: center,
@@ -304,24 +247,33 @@ public struct MetronomeDialView: View {
                         )
                     }
                 }
-                .frame(width: 170, height: 170)
-                
+                .frame(width: 162, height: 162)
+
                 // Center BPM Digital Readout
                 VStack(spacing: 0) {
                     Text("\(Int(bpm))")
                         .font(.system(size: 44, weight: .black, design: .monospaced))
                         .foregroundColor(Color.musicianGoldLight)
                         .tracking(-1.5)
-                        .shadow(color: Color.musicianGold.opacity(0.3), radius: 6)
-                    
-                    Text("BEATS / MINUTE")
-                        .font(.system(size: 8.5, weight: .heavy, design: .monospaced))
+                        .contentTransition(.numericText())
+
+                    Text("BPM")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
                         .foregroundColor(Color.gray)
                         .tracking(1.0)
                 }
             }
-            .frame(height: 170)
-            
+            .frame(height: 162)
+
+            // Beat Position Row
+            HStack(spacing: 6) {
+                ForEach(0..<beatsPerBar, id: \.self) { idx in
+                    let isActive = isRunning && activeBeatIndex == idx
+                    beatIndicator(index: idx, isActive: isActive, isAccent: idx == 0)
+                }
+            }
+            .frame(maxWidth: 260)
+
             // Stepper Buttons (-5, -1, +1, +5)
             HStack(spacing: 8) {
                 stepperButton("-5") { changeBPM(by: -5) }
@@ -329,138 +281,61 @@ public struct MetronomeDialView: View {
                 stepperButton("+1") { changeBPM(by: +1) }
                 stepperButton("+5") { changeBPM(by: +5) }
             }
-            
-            // Big Start / Stop Toggle Button
-            Button(action: togglePlay) {
-                HStack(spacing: 8) {
-                    Image(systemName: isRunning ? "stop.fill" : "play.fill")
-                        .font(.system(size: 14))
-                    Text(isRunning ? "STOP METRONOME" : "START METRONOME")
-                        .font(.system(size: 13, weight: .heavy, design: .monospaced))
-                        .tracking(0.5)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .foregroundColor(isRunning ? Color.white : Color.musicianEbony)
-                .background(isRunning ? Color(hex: 0xDC2626) : Color.musicianGold)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .shadow(
-                    color: isRunning ? Color.red.opacity(0.4) : Color.musicianGold.opacity(0.4),
-                    radius: 8,
-                    x: 0,
-                    y: 3
-                )
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(14)
-        .background(Color.musicianSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.gray.opacity(0.25), lineWidth: 0.8))
-    }
-    
-    private func stepperButton(_ label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                .foregroundColor(Color.musicianIvory)
-                .frame(width: 44, height: 30)
-                .background(Color.musicianCharcoal)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.gray.opacity(0.3), lineWidth: 0.8))
-        }
-        .buttonStyle(.plain)
-    }
-    
-    // MARK: - Presets & Time Signatures Card
-    
-    private var presetsAndSignaturesCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Time Signature Switcher
-            VStack(alignment: .leading, spacing: 6) {
-                Text("TIME SIGNATURE")
-                    .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                    .foregroundColor(Color.gray)
-                    .tracking(0.8)
-                
-                HStack(spacing: 5) {
-                    ForEach([2, 3, 4, 6], id: \.self) { ts in
-                        Button(action: {
-                            timeSignatureBeats = ts
-                            currentBeat = 0
-                        }) {
-                            Text("\(ts)/4")
-                                .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                                .foregroundColor(timeSignatureBeats == ts ? Color.musicianEbony : Color.musicianIvory)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 5)
-                                .background(timeSignatureBeats == ts ? Color.musicianGold : Color.musicianCharcoal)
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .strokeBorder(timeSignatureBeats == ts ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 0.8)
-                                )
-                        }
-                        .buttonStyle(.plain)
+
+            // Primary Start/Stop + Tap Tempo Row
+            HStack(spacing: 10) {
+                Button(action: togglePlay) {
+                    HStack(spacing: 7) {
+                        Image(systemName: isRunning ? "stop.fill" : "play.fill")
+                            .font(.system(size: 12.5))
+                        Text(isRunning ? "Stop" : "Start")
+                            .font(.system(size: 13, weight: .bold))
                     }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 36)
+                    .foregroundColor(isRunning ? Color.white : Color.musicianEbony)
+                    .background(isRunning ? Color.steinwayCrimson : Color.musicianGold)
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
                 }
-            }
-            
-            // Visual Beat Pulse Indicators
-            VStack(alignment: .leading, spacing: 6) {
-                Text("BEAT SUBDIVISIONS")
-                    .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                    .foregroundColor(Color.gray)
-                    .tracking(0.8)
-                
-                HStack(spacing: 5) {
-                    ForEach(0..<timeSignatureBeats, id: \.self) { idx in
-                        let isActive = isRunning && currentBeat == idx
-                        let isAccent = idx == 0
-                        beatIndicator(index: idx, isActive: isActive, isAccent: isAccent)
+                .studioPressable()
+
+                Button(action: handleTapTempo) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "hand.tap.fill")
+                            .font(.system(size: 11))
+                        Text("Tap")
+                            .font(.system(size: 12.5, weight: .semibold))
                     }
+                    .padding(.horizontal, 16)
+                    .frame(height: 36)
+                    .foregroundColor(Color.musicianIvory)
+                    .background(Color.musicianCharcoal)
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
+                    .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(Color.white.opacity(0.12), lineWidth: 0.8))
                 }
+                .studioPressable()
+                .help("Tap rhythmically to set tempo")
             }
-            
-            // Classical Tempo Markings Presets
-            VStack(alignment: .leading, spacing: 6) {
-                Text("TEMPO MARKINGS")
-                    .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                    .foregroundColor(Color.gray)
-                    .tracking(0.8)
-                
-                VStack(spacing: 4) {
-                    ForEach(MetronomePresets.standard) { preset in
-                        Button(action: { setBPM(preset.bpm) }) {
-                            HStack {
-                                Text(preset.name)
-                                    .font(.system(size: 11, weight: .bold, design: .serif))
-                                    .foregroundColor(Int(bpm) == Int(preset.bpm) ? Color.musicianGold : Color.musicianIvory)
-                                
-                                Spacer()
-                                
-                                Text("\(Int(preset.bpm)) BPM")
-                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                                    .foregroundColor(Color.gray)
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Int(bpm) == Int(preset.bpm) ? Color.musicianGold.opacity(0.15) : Color.musicianCharcoal.opacity(0.6))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .strokeBorder(Int(bpm) == Int(preset.bpm) ? Color.musicianGold.opacity(0.4) : Color.clear, lineWidth: 0.8)
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            .frame(maxWidth: 280)
         }
         .padding(14)
         .background(Color.musicianSurface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.06), lineWidth: 0.8))
+    }
+
+    private func stepperButton(_ label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(Color.musicianIvory)
+                .frame(width: 46, height: 28)
+                .background(Color.musicianCharcoal)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.white.opacity(0.10), lineWidth: 0.8))
+                .contentShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .studioPressable()
     }
     
     private func beatIndicator(index: Int, isActive: Bool, isAccent: Bool) -> some View {
@@ -530,42 +405,42 @@ public struct MetronomeDialView: View {
     
     @MainActor
     private func runMetronomeLoop() async {
-        // Play first click immediately
         fireBeatTick()
-        
+
         while isRunning {
             let intervalSec = 60.0 / bpm
             let halfInterval = intervalSec / 2.0
-            
-            // Swing pendulum to one side
+
             withAnimation(.easeInOut(duration: halfInterval)) {
-                pendulumAngle = (currentBeat % 2 == 0) ? -18.0 : 18.0
+                pendulumAngle = (activeBeatIndex % 2 == 0) ? -18.0 : 18.0
             }
-            
+
             try? await Task.sleep(nanoseconds: UInt64(halfInterval * 1_000_000_000))
             guard isRunning else { break }
-            
+
             withAnimation(.easeInOut(duration: halfInterval)) {
-                pendulumAngle = (currentBeat % 2 == 0) ? 18.0 : -18.0
+                pendulumAngle = (activeBeatIndex % 2 == 0) ? 18.0 : -18.0
             }
-            
+
             try? await Task.sleep(nanoseconds: UInt64(halfInterval * 1_000_000_000))
             guard isRunning else { break }
-            
-            currentBeat = (currentBeat + 1) % timeSignatureBeats
+
+            currentBeat = (currentBeat + 1) % beatsPerBar
             fireBeatTick()
         }
     }
-    
+
     private func fireBeatTick() {
-        let isAccent = (currentBeat == 0)
+        let isAccent = (activeBeatIndex == 0)
         onTickSound?(isAccent)
-        
-        // Trigger luminous pulse ring animation
+        triggerPulseRing()
+    }
+
+    private func triggerPulseRing() {
         pulseScale = 1.0
-        pulseOpacity = 0.8
+        pulseOpacity = 0.75
         withAnimation(.easeOut(duration: 0.35)) {
-            pulseScale = 1.45
+            pulseScale = 1.42
             pulseOpacity = 0.0
         }
     }

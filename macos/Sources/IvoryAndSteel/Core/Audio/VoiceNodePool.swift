@@ -65,15 +65,18 @@ public final class VoiceNodePool: @unchecked Sendable {
     
     /// Allocate a voice using circular ring buffer mechanics.
     /// If the selected voice is currently playing, a 3ms cosine micro-fadeout is performed
-    /// to steal the voice without audible clicks or speaker pops.
+    /// to steal the voice without audible clicks, speaker pops, or lock-inversion deadlocks.
     public func allocateVoice() -> VoiceNode {
         lock.lock()
-        defer { lock.unlock() }
-        
         let voice = voices[ringIndex]
         ringIndex = (ringIndex + 1) % Self.poolCapacity
+        let shouldSteal = voice.isPlaying
+        if shouldSteal {
+            voice.markStopped()
+        }
+        lock.unlock()
         
-        if voice.isPlaying {
+        if shouldSteal {
             performMicroFadeoutVoiceSteal(voice: voice)
         }
         

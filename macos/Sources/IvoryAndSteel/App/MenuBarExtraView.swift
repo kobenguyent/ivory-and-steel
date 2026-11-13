@@ -15,7 +15,7 @@ public struct MenuBarExtraView: View {
             // Header Bar
             HStack(spacing: 8) {
                 Image(systemName: "pianokeys")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Color.musicianGold)
                 
                 Text("Ivory & Steel")
@@ -24,13 +24,9 @@ public struct MenuBarExtraView: View {
                 
                 Spacer()
                 
-                Text("Key of \(appState.rootKey)")
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.musicianGold.opacity(0.15))
-                    .foregroundColor(Color.musicianGold)
-                    .clipShape(Capsule())
+                Text("\(appState.rootKey) Major")
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundColor(Color.white.opacity(0.6))
             }
             .padding(.bottom, 2)
             

@@ -128,3 +128,64 @@ public struct ChordQualityModel: Identifiable, Sendable, Equatable {
     }
 }
 
+/// Conservatory interval taxonomy entry with diatonic step distance and Rule-of-9 inversion.
+public struct IntervalModel: Identifiable, Sendable, Equatable, Hashable {
+    public let id: String
+    public let shortName: String
+    public let name: String
+    public let semitones: Int
+    public let diatonicSteps: Int
+    public let consonantCharacter: String
+
+    public init(
+        id: String,
+        shortName: String,
+        name: String,
+        semitones: Int,
+        diatonicSteps: Int,
+        consonantCharacter: String
+    ) {
+        self.id = id
+        self.shortName = shortName
+        self.name = name
+        self.semitones = semitones
+        self.diatonicSteps = diatonicSteps
+        self.consonantCharacter = consonantCharacter
+    }
+}
+
+/// Strictly spelled chord voicing including inversion / figured-bass telemetry.
+public struct SpelledChordModel: Sendable, Equatable {
+    public let root: String
+    public let qualityId: String
+    public let symbol: String
+    public let notes: [String]
+    public let intervalLabels: [String]
+    public let inversion: Int
+    public let inversionLabel: String
+    public let figuredBass: String
+    public let bassNote: String
+
+    public init(
+        root: String,
+        qualityId: String,
+        symbol: String,
+        notes: [String],
+        intervalLabels: [String],
+        inversion: Int,
+        inversionLabel: String,
+        figuredBass: String,
+        bassNote: String
+    ) {
+        self.root = root
+        self.qualityId = qualityId
+        self.symbol = symbol
+        self.notes = notes
+        self.intervalLabels = intervalLabels
+        self.inversion = inversion
+        self.inversionLabel = inversionLabel
+        self.figuredBass = figuredBass
+        self.bassNote = bassNote
+    }
+}
+

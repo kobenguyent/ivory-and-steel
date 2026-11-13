@@ -270,6 +270,25 @@ final class MusicTheoryEngineTests: XCTestCase {
 
         let cDom7 = engine.chordNotes(root: "C", qualityId: "dom7")
         XCTAssertEqual(cDom7.count, 4)
+
+        // All StudioPresets chords & aliases must resolve directly (never silently fallback)
+        for item in StudioPresets.chords {
+            XCTAssertNotNil(ChordDefinitions.chord(for: item.id), "StudioPresets chord \(item.id) must exist in ChordDefinitions")
+        }
+        XCTAssertEqual(ChordDefinitions.chord(for: "diminished")?.id, "dim")
+        XCTAssertEqual(ChordDefinitions.chord(for: "augmented")?.id, "aug")
+        XCTAssertEqual(ChordDefinitions.chord(for: "m7")?.id, "min7")
+        XCTAssertEqual(ChordDefinitions.chord(for: "9th")?.id, "dom9")
+        XCTAssertEqual(ChordDefinitions.chord(for: "11th")?.id, "dom11")
+        XCTAssertEqual(ChordDefinitions.chord(for: "13th")?.id, "dom13")
+
+        // Chord Voicing Inversions (Root Pos -> 1st Inv -> 2nd Inv)
+        let cRoot = engine.chordVoicing(root: "C", qualityId: "major", inversion: 0).map { $0.note }
+        let cFirst = engine.chordVoicing(root: "C", qualityId: "major", inversion: 1).map { $0.note }
+        let cSecond = engine.chordVoicing(root: "C", qualityId: "major", inversion: 2).map { $0.note }
+        XCTAssertEqual(cRoot, ["C4", "E4", "G4"])
+        XCTAssertEqual(cFirst, ["E4", "G4", "C5"])
+        XCTAssertEqual(cSecond, ["G4", "C5", "E5"])
     }
 
     // MARK: - Bundled Resources (TipsData.json & QuizData.json)
@@ -288,6 +307,7 @@ final class MusicTheoryEngineTests: XCTestCase {
         let tipsArray = try JSONSerialization.jsonObject(with: tipsData) as? [[String: Any]]
         XCTAssertNotNil(tipsArray)
         XCTAssertEqual(tipsArray?.count, 32, "TipsData.json must contain 32 masterclass tips")
+        let validTipIds = Set(tipsArray?.compactMap { $0["id"] as? String } ?? [])
 
         let decodedTips = ResourceLoader.decodeJSON([MasterclassTipModel].self, resource: "TipsData")
         XCTAssertNotNil(decodedTips)
@@ -296,10 +316,198 @@ final class MusicTheoryEngineTests: XCTestCase {
         let quizData = try Data(contentsOf: validQuizURL)
         let quizArray = try JSONSerialization.jsonObject(with: quizData) as? [[String: Any]]
         XCTAssertNotNil(quizArray)
-        XCTAssertEqual(quizArray?.count, 12, "QuizData.json must contain 12 quiz questions")
+        XCTAssertGreaterThanOrEqual(quizArray?.count ?? 0, 26, "QuizData.json must contain at least 26 conservatory quiz questions")
 
-        let decodedQuiz = ResourceLoader.decodeJSON([QuizQuestionModel].self, resource: "QuizData")
-        XCTAssertNotNil(decodedQuiz)
-        XCTAssertEqual(decodedQuiz?.count, 12, "ResourceLoader.decodeJSON must decode all 12 QuizQuestionModel items")
+        // Decode into QuizQuestionModel via ResourceLoader & cross-validate every relatedTipId against TipsData.json
+        let resourceDecoded = ResourceLoader.decodeJSON([QuizQuestionModel].self, resource: "QuizData")
+        XCTAssertNotNil(resourceDecoded, "ResourceLoader.decodeJSON must decode QuizData.json")
+        let decodedQuestions = try JSONDecoder().decode([QuizQuestionModel].self, from: quizData)
+        XCTAssertEqual(decodedQuestions.count, quizArray?.count)
+        XCTAssertEqual(resourceDecoded?.count, decodedQuestions.count)
+        for q in decodedQuestions {
+            XCTAssertEqual(q.options.count, 4, "Question \(q.id) must have 4 options")
+            XCTAssertTrue((0..<4).contains(q.correctIndex), "Question \(q.id) has invalid correctIndex")
+            if let tipId = q.relatedTipId {
+                XCTAssertTrue(validTipIds.contains(tipId), "Question \(q.id) references missing relatedTipId '\(tipId)'")
+            }
+        }
+    }
+
+    func testDiatonicChordNotesParseIntoValidPlayableMIDIRange() {
+        for root in KeyDefinitions.circleOfFifthsKeys.map({ $0.root }) {
+            let chords = engine.diatonicChords(for: root)
+            for chord in chords {
+                for note in chord.notes {
+                    let midi = engine.midiNote(for: note)
+                    XCTAssertGreaterThanOrEqual(midi, 36, "Note \(note) in \(chord.fullName) parsed below C2")
+                    XCTAssertLessThanOrEqual(midi, 96, "Note \(note) in \(chord.fullName) parsed above C7")
+                }
+            }
+        }
+        // Defensive clamping on invalid octave input (e.g. C44)
+        XCTAssertEqual(engine.midiNote(for: "C44"), 127)
+    }
+
+    // MARK: - Strict 7-Letter Diatonic Spelling, Double Accidentals & Interval Calculus
+
+    func testStrictDiatonicSpellingAndDoubleAccidentals() {
+        // F# Major must use E# as its leading tone (never F)
+        XCTAssertEqual(KeyDefinitions.keyInfo(for: "F#").majorScaleNotes, ["F#", "G#", "A#", "B", "C#", "D#", "E#"])
+        XCTAssertEqual(
+            engine.notes(forScale: "major", rootKey: "F#"),
+            ["F#4", "G#4", "A#4", "B4", "C#5", "D#5", "E#5", "F#5"]
+        )
+
+        // G Harmonic Minor must spell b3 = Bb, b6 = Eb, leading tone = F#
+        XCTAssertEqual(
+            engine.notes(forScale: "harmonic_minor", rootKey: "G"),
+            ["G4", "A4", "Bb4", "C5", "D5", "Eb5", "F#5", "G5"]
+        )
+
+        // Diminished 7th spelling must preserve stack of thirds (1, b3, b5, bb7)
+        XCTAssertEqual(engine.chordNotes(root: "B", qualityId: "dim7"), ["B3", "D4", "F4", "Ab4"])
+        XCTAssertEqual(engine.chordNotes(root: "C", qualityId: "dim7"), ["C4", "Eb4", "Gb4", "Bbb4"])
+
+        // F# diatonic vii° triad root must be E#
+        let fSharpTriads = engine.diatonicTriads(for: "F#")
+        XCTAssertEqual(fSharpTriads.last?.root, "E#")
+
+        // Double accidentals & E#5 round-trip accurately into MIDI & physical piano keys
+        XCTAssertEqual(engine.midiNote(for: "Bbb4"), 69)
+        XCTAssertEqual(engine.midiNote(for: "F##4"), 67)
+        XCTAssertEqual(engine.midiNote(for: "E#5"), 77)
+        XCTAssertEqual(engine.normalizeToPianoKey("Bbb4"), "A4")
+        XCTAssertEqual(engine.normalizeToPianoKey("E#5"), "F5")
+    }
+
+    func testIntervalCalculusAndRuleOf9Inversions() {
+        XCTAssertEqual(engine.interval(between: "C4", and: "F#4").shortName, "A4")
+        XCTAssertEqual(engine.interval(between: "C4", and: "Gb4").shortName, "d5")
+        XCTAssertEqual(engine.interval(between: "C4", and: "Ab4").shortName, "m6")
+
+        let invM3 = engine.invertInterval("M3")
+        XCTAssertEqual(invM3.invertedShortName, "m6")
+        XCTAssertEqual(invM3.complementarySemitones, 8)
+
+        let invP4 = engine.invertInterval("P4")
+        XCTAssertEqual(invP4.invertedShortName, "P5")
+        XCTAssertEqual(invP4.complementarySemitones, 7)
+
+        let invA4 = engine.invertInterval("A4")
+        XCTAssertEqual(invA4.invertedShortName, "d5")
+        XCTAssertEqual(invA4.complementarySemitones, 6)
+
+        let invm2 = engine.invertInterval("m2")
+        XCTAssertEqual(invm2.invertedShortName, "M7")
+        XCTAssertEqual(invm2.complementarySemitones, 11)
+    }
+
+    func testSpelledChordAndFiguredBassInversions() {
+        let triadInv1 = engine.spelledChord(root: "C", qualityId: "major", inversion: 1)
+        XCTAssertEqual(triadInv1.figuredBass, "6/3")
+        XCTAssertEqual(triadInv1.bassNote, "E")
+        XCTAssertEqual(triadInv1.inversionLabel, "1st Inversion")
+
+        let triadInv2 = engine.spelledChord(root: "C", qualityId: "major", inversion: 2)
+        XCTAssertEqual(triadInv2.figuredBass, "6/4")
+        XCTAssertEqual(triadInv2.bassNote, "G")
+
+        let seventhInv1 = engine.spelledChord(root: "G", qualityId: "dom7", inversion: 1)
+        XCTAssertEqual(seventhInv1.figuredBass, "6/5")
+        XCTAssertEqual(seventhInv1.bassNote, "B")
+
+        let seventhInv2 = engine.spelledChord(root: "G", qualityId: "dom7", inversion: 2)
+        XCTAssertEqual(seventhInv2.figuredBass, "4/3")
+        XCTAssertEqual(seventhInv2.bassNote, "D")
+
+        let seventhInv3 = engine.spelledChord(root: "G", qualityId: "dom7", inversion: 3)
+        XCTAssertEqual(seventhInv3.figuredBass, "4/2")
+        XCTAssertEqual(seventhInv3.bassNote, "F")
+        XCTAssertEqual(seventhInv3.inversionLabel, "3rd Inversion")
+    }
+
+    // MARK: - Conservatory Quiz Generator & Backward-Compatible Storage Models
+
+    func testQuizQuestionGeneratorAllDomainsAndModes() {
+        let generator = QuizQuestionGenerator.shared
+
+        // Exact lookup invariant: `"lydian"` must never match `"Mixolydian Mode"` substring first
+        XCTAssertEqual(ScaleDefinitions.scale(for: "lydian")?.id, "lydian")
+        XCTAssertEqual(ScaleDefinitions.scale(for: "mixolydian")?.id, "mixolydian")
+
+        // Every domain must produce valid 4-option, non-duplicate MCQs across difficulties & iterations
+        for domain in QuizDomain.allCases {
+            for difficulty in [QuizDifficulty.beginner, .intermediate, .advanced] {
+                for seed in 0..<5 {
+                    let q = generator.generateQuestion(for: domain, difficulty: difficulty, isGuitar: false, variantSeed: seed)
+                    XCTAssertEqual(q.options.count, 4, "Generated question in \(domain.rawValue) must have 4 options")
+                    XCTAssertEqual(Set(q.options).count, 4, "Options in \(domain.rawValue) must all be unique: \(q.options)")
+                    XCTAssertTrue((0..<4).contains(q.correctIndex))
+                    XCTAssertFalse(q.explanation.isEmpty)
+                    for visualNote in q.resolvedVisualNotes {
+                        let midi = engine.midiNote(for: visualNote)
+                        XCTAssertGreaterThanOrEqual(midi, 60, "Visual note \(visualNote) must stay within piano keybed >= C4")
+                        XCTAssertLessThanOrEqual(midi, 84, "Visual note \(visualNote) must stay within piano keybed <= C6")
+                    }
+                }
+            }
+        }
+
+        // Placement exam must yield 12 balanced items spanning at least 5 domains
+        let placement = generator.buildSession(mode: .placementExam, instrument: "all", difficulty: .all, curatedQuestions: [], targetCount: 12)
+        XCTAssertEqual(placement.count, 12)
+        let coveredDomains = Set(placement.map(\.resolvedDomain))
+        XCTAssertGreaterThanOrEqual(coveredDomains.count, 5)
+
+        // Ear training lab must yield pure aural questions with valid playable audio cues
+        let earLab = generator.buildSession(mode: .earTrainingLab, instrument: "piano", difficulty: .intermediate, curatedQuestions: [], targetCount: 10)
+        XCTAssertEqual(earLab.count, 10)
+        XCTAssertTrue(earLab.allSatisfy { $0.audioCue != nil && $0.resolvedDomain.isAuralDomain })
+
+        // Weighted Conservatory Grade Tiers
+        XCTAssertEqual(ConservatoryGradeTier.evaluate(weightedPercentage: 92).title, "Conservatory Laureate")
+        XCTAssertEqual(ConservatoryGradeTier.evaluate(weightedPercentage: 80).title, "Concert Harmonicist")
+        XCTAssertEqual(ConservatoryGradeTier.evaluate(weightedPercentage: 60).title, "Lyric Practitioner")
+        XCTAssertEqual(ConservatoryGradeTier.evaluate(weightedPercentage: 40).title, "Apprentice Musician")
+    }
+
+    func testQuizResultRecordBackwardCompatibleDecoding() throws {
+        // Legacy JSON produced prior to Conservatory Upgrade
+        let legacyJSON = """
+        {
+            "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+            "date": "2026-05-01T12:00:00Z",
+            "score": 5,
+            "totalQuestions": 6,
+            "levelName": "Advanced Harmonicist",
+            "category": "piano"
+        }
+        """.data(using: .utf8)!
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let legacy = try decoder.decode(QuizResultRecord.self, from: legacyJSON)
+        XCTAssertEqual(legacy.score, 5)
+        XCTAssertEqual(legacy.totalQuestions, 6)
+        XCTAssertNil(legacy.mode)
+        XCTAssertNil(legacy.weightedPercentage)
+        XCTAssertNil(legacy.domainScores)
+
+        // New Conservatory Record round-trip (whole-second epoch aligns with ISO-8601 encoder precision)
+        let modern = QuizResultRecord(
+            date: Date(timeIntervalSince1970: 1_780_000_000),
+            score: 11,
+            totalQuestions: 12,
+            levelName: "Conservatory Laureate",
+            category: "all",
+            mode: "Placement Exam",
+            weightedPercentage: 93.4,
+            domainScores: [DomainPerformanceRecord(domain: .auralIntervals, correct: 2, total: 2)]
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let encoded = try encoder.encode(modern)
+        let roundTripped = try decoder.decode(QuizResultRecord.self, from: encoded)
+        XCTAssertEqual(roundTripped, modern)
     }
 }

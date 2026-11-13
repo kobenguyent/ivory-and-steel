@@ -82,6 +82,7 @@ public enum PianoGeometry {
 
 public struct NativePianoView: View {
     public let highlightedNotes: [String]
+    public let externalActiveMidiNotes: Set<Int>
     public let rootNote: String?
     public let intervals: [String]
     public let preferFlat: Bool
@@ -92,19 +93,21 @@ public struct NativePianoView: View {
     @State private var activeNotes: Set<String> = []
     @State private var showLabels: Bool = true
     @State private var showKeyShortcuts: Bool = true
-    @State private var showDegrees: Bool = true
+    @State private var showDegrees: Bool = false
     @State private var isArpeggiating: Bool = false
     
     public init(
         highlightedNotes: [String] = [],
+        externalActiveMidiNotes: Set<Int> = [],
         rootNote: String? = nil,
         intervals: [String] = [],
         preferFlat: Bool = false,
-        title: String = "Interactive Grand Piano",
-        subtitle: String = "2-Octave Physical Model (C4–C6) · 12-TET Acoustic Grand",
+        title: String = "Piano Keyboard",
+        subtitle: String = "",
         onPlayNote: ((String, Int) -> Void)? = nil
     ) {
         self.highlightedNotes = highlightedNotes
+        self.externalActiveMidiNotes = externalActiveMidiNotes
         self.rootNote = rootNote
         self.intervals = intervals
         self.preferFlat = preferFlat
@@ -118,7 +121,6 @@ public struct NativePianoView: View {
             headerBar
             fallboardRail
             keybedView
-            footerSpecBar
         }
         .background(Color.musicianEbony)
         .clipShape(RoundedRectangle(cornerRadius: 14))
@@ -133,33 +135,16 @@ public struct NativePianoView: View {
     
     private var headerBar: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 8) {
-                    Image(systemName: "pianokeys")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color.musicianGold)
-                        .padding(6)
-                        .background(Color.musicianGold.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    
-                    Text(title)
-                        .font(.system(size: 17, weight: .bold, design: .serif))
-                        .foregroundColor(Color.musicianIvory)
-                    
-                    if !highlightedNotes.isEmpty {
-                        Text("\(highlightedNotes.count) Active")
-                            .font(.system(size: 9.5, weight: .semibold, design: .monospaced))
-                            .foregroundColor(Color.musicianGoldLight)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.white.opacity(0.06))
-                            .clipShape(Capsule())
-                    }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 11.5, weight: .regular))
+                        .foregroundColor(Color.gray)
                 }
-                
-                Text(subtitle)
-                    .font(.system(size: 11.5, weight: .regular))
-                    .foregroundColor(Color.gray)
             }
             
             Spacer()
@@ -185,15 +170,15 @@ public struct NativePianoView: View {
                                 .strokeBorder(Color.musicianGold.opacity(0.4), lineWidth: 1)
                         )
                     }
-                    .buttonStyle(.plain)
+                    .studioPressable()
                     .disabled(isArpeggiating)
                     
-                    // Strum Button
+                    // Play Chord Button
                     Button(action: runStrum) {
                         HStack(spacing: 4) {
                             Image(systemName: "hand.tap.fill")
                                 .font(.system(size: 9))
-                            Text("Strum")
+                            Text("Play Chord")
                                 .font(.system(size: 11, weight: .bold))
                         }
                         .padding(.horizontal, 10)
@@ -206,7 +191,7 @@ public struct NativePianoView: View {
                                 .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
                         )
                     }
-                    .buttonStyle(.plain)
+                    .studioPressable()
                 }
                 
                 // Toggles Capsule
@@ -227,45 +212,33 @@ public struct NativePianoView: View {
     }
     
     private func togglePill(_ title: String, isOn: Binding<Bool>) -> some View {
-        Button(action: { isOn.wrappedValue.toggle() }) {
+        Button(action: {
+            withAnimation(StudioMotion.snappyControl) {
+                isOn.wrappedValue.toggle()
+            }
+        }) {
             Text(title)
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(isOn.wrappedValue ? Color.musicianGold : Color.gray)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(isOn.wrappedValue ? Color.musicianGold.opacity(0.18) : Color.clear)
+                .background(isOn.wrappedValue ? Color.musicianGold.opacity(0.18) : Color.white.opacity(0.001))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                .contentShape(RoundedRectangle(cornerRadius: 6))
         }
-        .buttonStyle(.plain)
+        .studioPressable()
     }
     
-    // MARK: - Steinway Crimson Felt Rail & Brass Fallboard
-    
+    // MARK: - Crimson Felt Rail
+
     private var fallboardRail: some View {
         ZStack(alignment: .bottom) {
             LinearGradient.steinwayFelt
-                .frame(height: 12)
-            
-            // Gold Inlay String Line
+                .frame(height: 8)
+
             Rectangle()
-                .fill(Color.musicianGold.opacity(0.35))
+                .fill(Color.musicianGold.opacity(0.3))
                 .frame(height: 0.8)
-            
-            HStack {
-                Text("STEINWAY & SONS · CONCERT MODEL")
-                    .font(.system(size: 7, weight: .semibold, design: .serif))
-                    .tracking(1.8)
-                    .foregroundColor(Color.musicianGoldLight.opacity(0.65))
-                
-                Spacer()
-                
-                Text("12-TET · C4–C6")
-                    .font(.system(size: 7, weight: .medium, design: .monospaced))
-                    .tracking(1.0)
-                    .foregroundColor(Color.musicianGoldLight.opacity(0.5))
-            }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 2)
         }
     }
     
@@ -290,11 +263,11 @@ public struct NativePianoView: View {
                 // 2. Upward Acoustic Light Beams for Depressed White Keys
                 ForEach(PianoGeometry.whiteKeys.indices, id: \.self) { idx in
                     let key = PianoGeometry.whiteKeys[idx]
-                    if activeNotes.contains(key.note) {
+                    if isKeyPressed(key) {
                         Rectangle()
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.musicianGold.opacity(0.4), Color.musicianGoldLight.opacity(0.1), Color.clear],
+                                    colors: [Color.musicianGold.opacity(0.45), Color.musicianGoldLight.opacity(0.14), Color.clear],
                                     startPoint: .bottom,
                                     endPoint: .top
                                 )
@@ -321,22 +294,30 @@ public struct NativePianoView: View {
     // MARK: - White Key Rendering
     
     private func renderWhiteKey(key: PianoKeyModel, width: CGFloat, height: CGFloat) -> some View {
-        let isActive = activeNotes.contains(key.note)
+        let isActive = isKeyPressed(key)
         let isHighlighted = isKeyHighlighted(key)
         let isRoot = isHighlighted && isKeyRoot(key)
         let intervalLabel = isHighlighted ? getIntervalLabel(key) : ""
         
         return Button(action: { playKey(key) }) {
             ZStack(alignment: .bottom) {
-                // Key Body Background: Natural Acoustic Ivory (Never Saturated Yellow)
+                // Key Body Background: Natural Acoustic Ivory with unmistakable champagne highlight
                 RoundedRectangle(cornerRadius: 3.5)
                     .fill(isActive ? LinearGradient.ivoryKeyPressed : LinearGradient.ivoryKey)
                     .overlay(
-                        // Whisper-soft warm luminescence wash when active in scale/chord
                         Group {
                             if isHighlighted {
                                 RoundedRectangle(cornerRadius: 3.5)
-                                    .fill(Color.musicianGold.opacity(isRoot ? 0.08 : 0.04))
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [
+                                                Color.musicianGold.opacity(isRoot ? 0.32 : 0.19),
+                                                Color.musicianGold.opacity(isRoot ? 0.14 : 0.08)
+                                            ],
+                                            startPoint: .bottom,
+                                            endPoint: .top
+                                        )
+                                    )
                             }
                         }
                     )
@@ -344,15 +325,15 @@ public struct NativePianoView: View {
                         RoundedRectangle(cornerRadius: 3.5)
                             .strokeBorder(
                                 isHighlighted
-                                    ? (isRoot ? Color.musicianGold.opacity(0.7) : Color.musicianGold.opacity(0.35))
+                                    ? (isRoot ? Color.musicianGold.opacity(0.95) : Color.musicianGold.opacity(0.55))
                                     : Color.black.opacity(0.12),
-                                lineWidth: isHighlighted ? 1.0 : 0.6
+                                lineWidth: isHighlighted ? (isRoot ? 1.5 : 1.0) : 0.6
                             )
                     )
                 
                 // Active Depression Shadow & Glow
                 if isActive {
-                    Color.musicianGold.opacity(0.15)
+                    Color.musicianGold.opacity(0.22)
                         .clipShape(RoundedRectangle(cornerRadius: 3.5))
                 }
                 
@@ -361,7 +342,7 @@ public struct NativePianoView: View {
                     // Top: Harmonic Role Badge
                     if isHighlighted && showDegrees && !intervalLabel.isEmpty {
                         HarmonicRoleBadge(intervalLabel, isRoot: isRoot, size: .mini, showIcon: false)
-                            .padding(.top, 5)
+                            .padding(.top, 6)
                     } else {
                         Spacer().frame(height: 16)
                     }
@@ -372,10 +353,10 @@ public struct NativePianoView: View {
                     if showKeyShortcuts, let shortcut = key.keyTrigger {
                         Text(shortcut)
                             .font(.system(size: 8, weight: .semibold, design: .monospaced))
-                            .foregroundColor(Color.black.opacity(0.4))
+                            .foregroundColor(Color.black.opacity(0.45))
                             .padding(.horizontal, 3.5)
                             .padding(.vertical, 1)
-                            .background(Color.black.opacity(0.04))
+                            .background(Color.black.opacity(0.05))
                             .clipShape(RoundedRectangle(cornerRadius: 2.5))
                     }
                     
@@ -385,17 +366,17 @@ public struct NativePianoView: View {
                             .font(.system(size: 10.5, weight: isHighlighted ? .bold : .medium))
                             .foregroundColor(
                                 isHighlighted
-                                    ? (isRoot ? Color.musicianGoldDark : Color(hex: 0x1E293B))
+                                    ? (isRoot ? Color.musicianGoldDark : Color(hex: 0x0F172A))
                                     : Color(hex: 0x475569)
                             )
                             .padding(.bottom, isHighlighted ? 1 : 6)
                     }
                     
-                    // Illuminated Champagne Gold Jewel Pip at Key Foot
+                    // Illuminated Champagne Gold Indicator Bar at Key Foot
                     if isHighlighted {
                         Capsule()
-                            .fill(isRoot ? Color.musicianGold : Color.musicianGold.opacity(0.75))
-                            .frame(width: isRoot ? 12 : 7, height: 3)
+                            .fill(isRoot ? Color.musicianGoldDark : Color.musicianGold)
+                            .frame(width: max(12, width * (isRoot ? 0.56 : 0.42)), height: 4)
                             .padding(.bottom, 4)
                     }
                 }
@@ -412,7 +393,7 @@ public struct NativePianoView: View {
     // MARK: - Black Key Rendering
     
     private func renderBlackKey(key: PianoKeyModel, width: CGFloat, height: CGFloat) -> some View {
-        let isActive = activeNotes.contains(key.note)
+        let isActive = isKeyPressed(key)
         let isHighlighted = isKeyHighlighted(key)
         let isRoot = isHighlighted && isKeyRoot(key)
         let intervalLabel = isHighlighted ? getIntervalLabel(key) : ""
@@ -425,22 +406,30 @@ public struct NativePianoView: View {
                 RoundedRectangle(cornerRadius: 3.5)
                     .fill(isActive ? LinearGradient.ebonyKeyPressed : LinearGradient.ebonyKey)
                     .overlay(
+                        Group {
+                            if isHighlighted {
+                                RoundedRectangle(cornerRadius: 3.5)
+                                    .fill(Color.musicianGold.opacity(isRoot ? 0.30 : 0.18))
+                            }
+                        }
+                    )
+                    .overlay(
                         RoundedRectangle(cornerRadius: 3.5)
                             .strokeBorder(
                                 isHighlighted
-                                    ? (isRoot ? Color.musicianGold : Color.musicianGold.opacity(0.6))
+                                    ? (isRoot ? Color.musicianGold : Color.musicianGold.opacity(0.75))
                                     : Color.black.opacity(0.9),
-                                lineWidth: isHighlighted ? 1.0 : 0.8
+                                lineWidth: isHighlighted ? 1.4 : 0.8
                             )
                     )
-                    .shadow(color: Color.black.opacity(0.6), radius: 4, x: 0, y: 3)
+                    .shadow(color: isHighlighted ? Color.musicianGold.opacity(0.35) : Color.black.opacity(0.6), radius: isHighlighted ? 6 : 4, x: 0, y: 3)
                 
                 // Top Luminous Crown on Black Key
                 VStack {
                     if isHighlighted {
                         Rectangle()
                             .fill(LinearGradient.goldGlow)
-                            .frame(height: 3)
+                            .frame(height: 3.5)
                             .clipShape(RoundedRectangle(cornerRadius: 1))
                     } else {
                         Rectangle()
@@ -467,7 +456,7 @@ public struct NativePianoView: View {
                 VStack(spacing: 3) {
                     if isHighlighted && showDegrees && !intervalLabel.isEmpty {
                         HarmonicRoleBadge(intervalLabel, isRoot: isRoot, size: .mini, showIcon: false)
-                            .padding(.top, 4)
+                            .padding(.top, 5)
                     } else {
                         Spacer().frame(height: 14)
                     }
@@ -501,40 +490,6 @@ public struct NativePianoView: View {
             .animation(.spring(response: 0.12, dampingFraction: 0.7), value: isActive)
         }
         .buttonStyle(.plain)
-    }
-    
-    // MARK: - Footer Spec Bar
-    
-    private var footerSpecBar: some View {
-        HStack {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 10))
-                    .foregroundColor(Color.musicianGold)
-                Text("12-TET Physical Resonance")
-                    .font(.system(size: 10.5, weight: .medium))
-                    .foregroundColor(Color.gray)
-                Text("·")
-                    .foregroundColor(Color.gray.opacity(0.5))
-                Text("25-Key Dual Octave Studio Keyboard")
-                    .font(.system(size: 10.5, weight: .regular))
-                    .foregroundColor(Color.gray.opacity(0.8))
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 5) {
-                Image(systemName: "speaker.wave.2.fill")
-                    .font(.system(size: 10))
-                    .foregroundColor(Color.musicianGold.opacity(0.8))
-                Text("Polyphonic Stereo Acoustic Grand")
-                    .font(.system(size: 10.5, weight: .medium, design: .monospaced))
-                    .foregroundColor(Color.gray)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.musicianSurface.opacity(0.85))
     }
     
     // MARK: - Interactions & Helpers
@@ -581,50 +536,74 @@ public struct NativePianoView: View {
         }
     }
     
+    private func isKeyPressed(_ key: PianoKeyModel) -> Bool {
+        activeNotes.contains(key.note) || externalActiveMidiNotes.contains(key.midiNote)
+    }
+    
     private func isKeyHighlighted(_ key: PianoKeyModel) -> Bool {
-        if highlightedNotes.contains(key.note) { return true }
-        if let flat = key.flatLabel, highlightedNotes.contains(flat) { return true }
-        
-        // Pitch class check
-        let keyPitchClass = pitchClass(of: key.note)
-        return highlightedNotes.contains { pitchClass(of: $0) == keyPitchClass }
+        for note in highlightedNotes {
+            let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+            let hasOctave = trimmed.range(of: "-?\\d+$", options: .regularExpression) != nil
+            if hasOctave {
+                let targetMidi = MusicTheoryEngine.shared.midiNote(for: trimmed)
+                if targetMidi == key.midiNote {
+                    return true
+                }
+                // Fallback to pitch-class match ONLY if the voiced note sits outside the C4–C6 keybed (MIDI 60..84)
+                if (targetMidi < 60 || targetMidi > 84) && (targetMidi % 12) == (key.midiNote % 12) {
+                    return true
+                }
+            } else {
+                if pitchClassNumber(of: trimmed) == (key.midiNote % 12) {
+                    return true
+                }
+            }
+        }
+        return false
     }
     
     private func isKeyRoot(_ key: PianoKeyModel) -> Bool {
         guard let root = rootNote else {
             // Fallback to first highlighted note
             guard let first = highlightedNotes.first else { return false }
-            return pitchClass(of: key.note) == pitchClass(of: first)
+            return pitchClassNumber(of: first) == (key.midiNote % 12)
         }
-        return pitchClass(of: key.note) == pitchClass(of: root)
+        return pitchClassNumber(of: root) == (key.midiNote % 12)
     }
     
     private func getIntervalLabel(_ key: PianoKeyModel) -> String {
         guard let root = rootNote ?? highlightedNotes.first else { return "" }
         let rootPC = pitchClassNumber(of: root)
-        let keyPC = pitchClassNumber(of: key.note)
+        let keyPC = key.midiNote % 12
         let semitones = (keyPC - rootPC + 12) % 12
         
-        // If intervals array matches highlightedNotes
-        if let idx = highlightedNotes.firstIndex(where: { pitchClass(of: $0) == pitchClass(of: key.note) }),
+        // Prefer exact interval match from provided intervals list when available
+        if let idx = highlightedNotes.firstIndex(where: { pitchClassNumber(of: $0) == keyPC }),
            idx < intervals.count {
-            let label = intervals[idx]
-            if label.lowercased().contains("root") || label == "1" { return "ROOT" }
-            return label
+            let raw = intervals[idx].trimmingCharacters(in: .whitespacesAndNewlines)
+            if raw.lowercased().contains("root") || raw == "1" || raw == "1st" {
+                return "ROOT"
+            }
+            // Extract concise symbol inside parentheses if formatted like "Minor 3rd (b3)"
+            if let open = raw.lastIndex(of: "("), let close = raw.lastIndex(of: ")"), open < close {
+                let inner = String(raw[raw.index(after: open)..<close])
+                return inner.replacingOccurrences(of: "b", with: "♭").replacingOccurrences(of: "#", with: "♯")
+            }
+            return raw.replacingOccurrences(of: "b", with: "♭").replacingOccurrences(of: "#", with: "♯")
         }
         
         let intervalNames: [Int: String] = [
             0: "ROOT",
-            1: "b2",
+            1: "♭2",
             2: "2ND",
-            3: "m3",
+            3: "♭3",
             4: "3RD",
             5: "4TH",
-            6: "b5",
+            6: "♭5",
             7: "5TH",
-            8: "b6",
+            8: "♯5",
             9: "6TH",
-            10: "m7",
+            10: "♭7",
             11: "7TH"
         ]
         return intervalNames[semitones] ?? ""

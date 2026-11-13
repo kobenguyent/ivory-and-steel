@@ -39,6 +39,7 @@ public struct MainWindowView: View {
     @State private var showingSettingsSheet: Bool = false
     @Namespace private var sidebarAnimationNamespace
     @State private var hoveredTab: AppTab? = nil
+    @State private var isMetronomeHovered: Bool = false
     
     public init() {}
     
@@ -47,27 +48,25 @@ public struct MainWindowView: View {
             sidebarContent
                 .navigationSplitViewColumnWidth(min: 210, ideal: 230, max: 260)
         } detail: {
-            detailContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.musicianEbony)
+            ZStack {
+                detailContent
+                    .id(appState.selectedTab)
+                    .transition(.studioPage)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.musicianEbony)
+            .animation(StudioMotion.sheetReveal, value: appState.selectedTab)
         }
         .toolbar {
             toolbarItems
         }
         .sheet(isPresented: $showingSettingsSheet) {
-            NavigationStack {
-                SettingsView()
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") {
-                                showingSettingsSheet = false
-                            }
-                            .foregroundColor(Color.musicianGold)
-                        }
-                    }
+            SettingsView {
+                showingSettingsSheet = false
             }
-            .frame(minWidth: 700, minHeight: 550)
+            .frame(minWidth: 720, idealWidth: 760, minHeight: 610, idealHeight: 660)
             .background(Color.musicianEbony)
+            .preferredColorScheme(.dark)
         }
         .sheet(
             isPresented: Binding(
@@ -84,40 +83,16 @@ public struct MainWindowView: View {
     
     private var sidebarContent: some View {
         VStack(spacing: 0) {
-            // App Branding Header (Frosted Glass Tile)
-            HStack(spacing: 11) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(Color.white.opacity(0.08))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                .strokeBorder(
-                                    LinearGradient(
-                                        colors: [Color.white.opacity(0.25), Color.white.opacity(0.05)],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    ),
-                                    lineWidth: 0.8
-                                )
-                        )
-                        .shadow(color: Color.black.opacity(0.2), radius: 4, y: 2)
-                    
-                    Image(systemName: "pianokeys")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color.white)
-                }
-                .frame(width: 34, height: 34)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Ivory & Steel")
-                        .font(.system(size: 14.5, weight: .bold, design: .serif))
-                        .foregroundColor(Color.white)
-                    
-                    Text("Concert Grand & Luthier")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(Color.white.opacity(0.55))
-                }
-                
+            // App Wordmark
+            HStack(spacing: 10) {
+                Image(systemName: "pianokeys")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color.musicianGold)
+
+                Text("Ivory & Steel")
+                    .font(.system(size: 15, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -150,6 +125,7 @@ public struct MainWindowView: View {
                                             ? Color.white
                                             : Color.white.opacity(isHovered ? 0.9 : 0.6)
                                     )
+                                    .symbolEffect(.bounce, value: isSelected)
                                     .frame(width: 20)
                                 
                                 Text(tab.rawValue)
@@ -162,6 +138,7 @@ public struct MainWindowView: View {
                                 
                                 Spacer()
                             }
+                            .offset(x: isHovered && !isSelected ? 2 : 0)
                             .padding(.vertical, 7.5)
                             .padding(.horizontal, 11)
                             .background {
@@ -189,6 +166,7 @@ public struct MainWindowView: View {
                                     }
                                 }
                             }
+                            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                         }
                         .buttonStyle(.plain)
                         .onHover { hovering in
@@ -323,75 +301,118 @@ public struct MainWindowView: View {
     
     @ToolbarContentBuilder
     private var toolbarItems: some ToolbarContent {
-        ToolbarItemGroup(placement: .principal) {
-            HStack(spacing: 10) {
-                // Key Selector Quick Pill
-                Menu {
-                    ForEach(KeyDefinitions.chromaticRoots, id: \.self) { key in
-                        Button(action: {
-                            appState.setRootKey(key)
-                        }) {
-                            HStack {
-                                Text("Key of \(key)")
-                                if appState.rootKey == key {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 6) {
+        ToolbarItem(placement: .principal) {
+            HStack(spacing: 4) {
+                // Unified Key Selector (Sits natively inside macOS toolbar glass — zero nested double-bezel borders)
+                LuxuryDropdown(
+                    selection: Binding(
+                        get: { appState.rootKey },
+                        set: { appState.setRootKey($0) }
+                    ),
+                    options: KeyDefinitions.chromaticRoots.map { key in
+                        let info = KeyDefinitions.keyInfo(for: key)
+                        let accLabel = info.accidentalType == "natural"
+                            ? "♮"
+                            : (info.accidentalType == "sharp" ? "\(info.sharpsCount)♯" : "\(info.flatsCount)♭")
+                        return LuxuryDropdownOption(
+                            value: key,
+                            title: "Key of \(key.replacingOccurrences(of: "b", with: "♭"))",
+                            subtitle: "Rel. \(info.relativeMinor)",
+                            badge: accLabel
+                        )
+                    },
+                    popoverWidth: 230,
+                    maxPopoverHeight: 340,
+                    shape: .capsule
+                ) { isOpen, isHovered in
+                    HStack(spacing: 5.5) {
                         Circle()
                             .fill(Color.musicianGold)
-                            .frame(width: 7, height: 7)
+                            .frame(width: 6.5, height: 6.5)
                         
-                        Text("Key: \(appState.rootKey) Major")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(Color.musicianIvory)
+                        HStack(spacing: 3.5) {
+                            Text("Key:")
+                                .font(.system(size: 11.5, weight: .medium))
+                                .foregroundColor(Color.white.opacity(0.55))
+                            
+                            Text("\(appState.rootKey.replacingOccurrences(of: "b", with: "♭")) Major")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(isOpen ? Color.musicianGoldLight : Color.musicianIvory)
+                        }
                         
-                        Image(systemName: "chevron.up.chevron.down")
+                        Image(systemName: "chevron.down")
                             .font(.system(size: 8, weight: .bold))
-                            .foregroundColor(Color.white.opacity(0.5))
+                            .foregroundColor(isOpen ? Color.musicianGold : Color.white.opacity(0.45))
+                            .rotationEffect(.degrees(isOpen ? 180 : 0))
+                            .animation(.spring(response: 0.28, dampingFraction: 0.78), value: isOpen)
                     }
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.06))
-                    .clipShape(Capsule())
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(
+                        Capsule().fill(
+                            isOpen
+                                ? Color.musicianGold.opacity(0.14)
+                                : (isHovered ? Color.white.opacity(0.08) : Color.clear)
+                        )
+                    )
                     .overlay(
-                        Capsule()
-                            .strokeBorder(Color.white.opacity(0.12), lineWidth: 0.8)
+                        Capsule().strokeBorder(
+                            isOpen ? Color.musicianGold.opacity(0.42) : Color.clear,
+                            lineWidth: 0.75
+                        )
                     )
                 }
-                .menuStyle(.borderlessButton)
                 
-                // Metronome Quick Pill
+                // Delicate Hairline Divider
+                Rectangle()
+                    .fill(Color.white.opacity(0.14))
+                    .frame(width: 1, height: 13)
+                
+                // Metronome Quick Toggle (Matched height, baseline & hover responsiveness)
                 Button(action: {
                     appState.toggleMetronome()
                 }) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 5.5) {
                         Image(systemName: appState.isMetronomePlaying ? "pause.fill" : "play.fill")
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(appState.isMetronomePlaying ? Color.steinwayCrimson : Color.musicianGold)
                         
                         Text("\(Int(appState.metronomeBPM))")
-                            .font(.system(size: 11.5, weight: .bold, design: .monospaced))
-                            .foregroundColor(Color.musicianIvory)
+                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                            .foregroundColor(appState.isMetronomePlaying ? Color.musicianIvory : Color.musicianIvory)
+                            .contentTransition(.numericText())
                         
                         Text("BPM")
-                            .font(.system(size: 9.5, weight: .medium))
+                            .font(.system(size: 10.5, weight: .medium))
                             .foregroundColor(Color.white.opacity(0.5))
                     }
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.06))
-                    .clipShape(Capsule())
-                    .overlay(
-                        Capsule()
-                            .strokeBorder(Color.white.opacity(0.12), lineWidth: 0.8)
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(
+                        Capsule().fill(
+                            appState.isMetronomePlaying
+                                ? Color.steinwayCrimson.opacity(0.16)
+                                : (isMetronomeHovered ? Color.white.opacity(0.08) : Color.clear)
+                        )
                     )
+                    .overlay(
+                        Capsule().strokeBorder(
+                            appState.isMetronomePlaying ? Color.steinwayCrimson.opacity(0.45) : Color.clear,
+                            lineWidth: 0.75
+                        )
+                    )
+                    .contentShape(Capsule())
                 }
-                .buttonStyle(.plain)
+                .studioPressable(scale: 0.96)
+                .onHover { hovering in
+                    withAnimation(.easeOut(duration: 0.16)) {
+                        isMetronomeHovered = hovering
+                    }
+                }
+                .help(appState.isMetronomePlaying ? "Pause Metronome" : "Start Metronome (\(Int(appState.metronomeBPM)) BPM)")
             }
+            .padding(.horizontal, 2)
+            .fixedSize()
         }
         
         ToolbarItemGroup(placement: .primaryAction) {

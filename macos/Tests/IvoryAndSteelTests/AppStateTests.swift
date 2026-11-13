@@ -223,5 +223,154 @@ final class AppStateTests: XCTestCase {
         // Clean up
         try? FileManager.default.removeItem(at: tempURL)
     }
+    
+    func testStorageManagerPracticeTasksPersistenceAndLegacyBackwardCompatibility() throws {
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_tasks_\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+        
+        // Simulate legacy storage.json written before practiceTasks existed
+        let legacyJSON = """
+        {
+          "bookmarkedTipIds": ["tip-01"],
+          "practiceSessions": [],
+          "quizResults": []
+        }
+        """
+        try legacyJSON.write(to: tempURL, atomically: true, encoding: .utf8)
+        
+        let storage = StorageManager(customFileURL: tempURL)
+        XCTAssertTrue(storage.isBookmarked(tipId: "tip-01"))
+        XCTAssertEqual(storage.practiceTasks.count, PracticeChecklistTask.defaultProtocol.count)
+        
+        // Mutate and persist custom tasks
+        let customTask = PracticeChecklistTask(
+            id: "custom-1",
+            title: "Chopin Etude Op. 10 No. 1 Arpeggios",
+            details: "Keep thumb release light and relaxed.",
+            estimatedMinutes: 10,
+            targetBPM: 72,
+            isCompleted: true
+        )
+        storage.savePracticeTasks([customTask])
+        
+        let reloaded = StorageManager(customFileURL: tempURL)
+        XCTAssertEqual(reloaded.practiceTasks.count, 1)
+        XCTAssertEqual(reloaded.practiceTasks.first?.title, "Chopin Etude Op. 10 No. 1 Arpeggios")
+        XCTAssertEqual(reloaded.practiceTasks.first?.targetBPM, 72)
+        XCTAssertEqual(reloaded.practiceTasks.first?.isCompleted, true)
+        
+        let restored = reloaded.resetPracticeTasksToDefault()
+        XCTAssertEqual(restored.count, PracticeChecklistTask.defaultProtocol.count)
+    }
+
+    func testPlayQuizCueAndStopCancellation() {
+        let cue = QuizAudioCue(
+            style: .melodic,
+            notes: ["C4", "Ab4"],
+            referenceRootNote: "C4",
+            stepDuration: 0.4,
+            isGuitar: false
+        )
+
+        state.playQuizCue(cue)
+        XCTAssertEqual(state.activeVoicingNotes, ["C4", "Ab4"])
+
+        state.stopQuizPlayback()
+        XCTAssertTrue(state.activeVoicingNotes.isEmpty)
+
+        // Muted state must suppress new playback and leave voicing notes clean
+        state.toggleMute()
+        XCTAssertTrue(state.isMuted)
+        state.playQuizCue(cue)
+        XCTAssertTrue(state.activeVoicingNotes.isEmpty)
+    }
+
+    func testStorageManagerAppSettingsPersistenceAndLegacyBackwardCompatibility() throws {
+        let legacySettingsJSON = """
+        {
+          "audioBufferSize": 512,
+          "midiDeviceName": "Nord Stage 4",
+          "soundfontModel": "Hamburg Steinway D",
+          "theme": "ebony",
+          "metronomeSound": "woodblock",
+          "practiceGoalMinutesPerDay": 45
+        }
+        """
+        let decodedLegacy = try JSONDecoder().decode(
+            AppSettingsRecord.self,
+            from: Data(legacySettingsJSON.utf8)
+        )
+        XCTAssertEqual(decodedLegacy.audioBufferSize, 512)
+        XCTAssertEqual(decodedLegacy.midiDeviceName, "Nord Stage 4")
+        XCTAssertEqual(decodedLegacy.soundfontModel, "Hamburg Steinway D")
+        XCTAssertEqual(decodedLegacy.guitarModel, "Boutique Luthier Steel String")
+        XCTAssertEqual(decodedLegacy.practiceGoalMinutesPerDay, 45)
+
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ivory-steel-settings-test-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        let storage = StorageManager(customFileURL: tempURL)
+        XCTAssertEqual(storage.storageFileURL, tempURL)
+        XCTAssertEqual(storage.settings.guitarModel, "Boutique Luthier Steel String")
+
+        storage.updateSettings { settings in
+            settings.audioBufferSize = 128
+            settings.soundfontModel = "Bösendorfer 290 Imperial"
+            settings.guitarModel = "Concert Classical Nylon"
+        }
+
+        let reloaded = StorageManager(customFileURL: tempURL)
+        XCTAssertEqual(reloaded.storageFileURL, tempURL)
+        XCTAssertEqual(reloaded.settings.audioBufferSize, 128)
+        XCTAssertEqual(reloaded.settings.soundfontModel, "Bösendorfer 290 Imperial")
+        XCTAssertEqual(reloaded.settings.guitarModel, "Concert Classical Nylon")
+    }
+
+    // MARK: - Cross-Page Navigation Handoffs
+
+    func testOpenInPianoAndGuitarStudiosSyncsStateAndTab() {
+        state.openInPianoStudio(root: "Eb", voicingNotes: ["Eb4", "G4", "Bb4", "D5"])
+        XCTAssertEqual(state.selectedTab, .virtualPiano)
+        XCTAssertEqual(state.activeInstrument, "piano")
+        XCTAssertEqual(state.rootKey, "Eb")
+        XCTAssertTrue(state.preferFlat)
+        XCTAssertEqual(state.activeVoicingNotes, ["Eb4", "G4", "Bb4", "D5"])
+        XCTAssertFalse(state.pianoGuideEnabled)
+
+        state.openInGuitarStudio(root: "A", scaleId: "dorian")
+        XCTAssertEqual(state.selectedTab, .guitarFretboard)
+        XCTAssertEqual(state.activeInstrument, "guitar")
+        XCTAssertEqual(state.rootKey, "A")
+        XCTAssertEqual(state.selectedScaleId, "dorian")
+        XCTAssertEqual(state.guitarGuideScaleId, "dorian")
+        XCTAssertTrue(state.guitarGuideEnabled)
+    }
+
+    func testMasterclassAndMetronomeAndPracticeNavigationHandoffs() throws {
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ivory-steel-handoff-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+        let storage = StorageManager(customFileURL: tempURL)
+
+        state.openMetronome(atBPM: 96)
+        XCTAssertEqual(state.selectedTab, .metronome)
+        XCTAssertEqual(state.metronomeBPM, 96)
+
+        state.openMasterclassTopic(id: "tip-04")
+        XCTAssertEqual(state.selectedTab, .masterclassHub)
+        XCTAssertEqual(state.masterclassSelectedTipId, "tip-04")
+
+        state.addTaskToPracticeRoutine(
+            title: "C Major Hands Separate Arpeggios",
+            details: "Keep wrist loose across thumb pass.",
+            estimatedMinutes: 8,
+            targetBPM: 72,
+            navigate: true,
+            storage: storage
+        )
+        XCTAssertEqual(state.selectedTab, .practiceRoutine)
+        XCTAssertTrue(storage.practiceTasks.contains { $0.title == "C Major Hands Separate Arpeggios" && $0.targetBPM == 72 })
+    }
 }
 

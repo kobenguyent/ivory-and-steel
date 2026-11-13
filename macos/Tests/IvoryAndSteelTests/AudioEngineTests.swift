@@ -280,4 +280,44 @@ final class AudioEngineTests: XCTestCase {
         engine.playMetronomeClick(isAccent: true)
         engine.setMuted(false)
     }
+    
+    func testAcousticPianoStereoImagingAndNaturalDecay() {
+        let stereoFormat = AVAudioFormat(standardFormatWithSampleRate: 44100.0, channels: 2)!
+        guard let buffer = DSPMath.renderPianoBuffer(
+            midi: 48, // C3 (bass-left stereo imaging + long sustain)
+            velocity: 0.80,
+            duration: 1.8,
+            sampleRate: 44100.0,
+            format: stereoFormat
+        ), let channelData = buffer.floatChannelData else {
+            XCTFail("Failed to render stereo piano buffer")
+            return
+        }
+        
+        let frames = Int(buffer.frameLength)
+        let left = channelData[0]
+        let right = channelData[1]
+        
+        // Early attack energy (first 100ms) must exceed tail energy (last 100ms)
+        let window = 4410
+        var earlyEnergy: Double = 0.0
+        var tailEnergy: Double = 0.0
+        var channelDiff: Double = 0.0
+        
+        for i in 0..<window {
+            let l = Double(left[i])
+            let r = Double(right[i])
+            earlyEnergy += l * l + r * r
+            channelDiff += abs(l - r)
+        }
+        for i in (frames - window)..<frames {
+            let l = Double(left[i])
+            let r = Double(right[i])
+            tailEnergy += l * l + r * r
+        }
+        
+        XCTAssertGreaterThan(earlyEnergy, tailEnergy * 4.0, "Piano tone should decay naturally from strike to tail")
+        XCTAssertGreaterThan(channelDiff, 0.01, "Stereo piano buffer should exhibit subtle stereo imaging/unison width")
+        XCTAssertTrue(AudioEngine.shared.isCached(instrument: "piano", midi: 36), "C2 (MIDI 36) should be pre-cached")
+    }
 }

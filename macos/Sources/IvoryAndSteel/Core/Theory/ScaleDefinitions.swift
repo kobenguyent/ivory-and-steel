@@ -94,15 +94,19 @@ public enum ScaleDefinitions {
         )
     ]
 
-    /// Lookup scale quality by id or name
+    /// Lookup scale quality by id or name (exact match before substring fallback so `"lydian"` never resolves to `"Mixolydian"`).
     public static func scale(for id: String) -> ScaleQualityModel? {
         let clean = id.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let normalized = clean.replacingOccurrences(of: "-", with: "_").replacingOccurrences(of: " ", with: "_")
 
-        return allScales.first(where: {
+        if let exact = allScales.first(where: {
             $0.id.lowercased() == clean ||
             $0.id.lowercased() == normalized ||
-            $0.name.lowercased().contains(clean)
-        })
+            $0.name.lowercased() == clean
+        }) {
+            return exact
+        }
+
+        return allScales.first(where: { $0.name.lowercased().contains(clean) })
     }
 }

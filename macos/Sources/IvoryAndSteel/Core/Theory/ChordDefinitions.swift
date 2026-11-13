@@ -145,17 +145,40 @@ public enum ChordDefinitions {
             semitones: [0, 3, 7, 10, 14, 17],
             intervalLabels: ["Root (1)", "Minor 3rd (b3)", "Perfect 5th (5)", "Minor 7th (b7)", "Major 9th (9)", "Perfect 11th (11)"],
             description: "Deep, ambient minor chord favored by McCoy Tyner and modern pianists."
+        ),
+        ChordQualityModel(
+            id: "dom13",
+            name: "Dominant 13th",
+            symbol: "13",
+            semitones: [0, 4, 7, 10, 14, 21],
+            intervalLabels: ["Root (1)", "Major 3rd (3)", "Perfect 5th (5)", "Minor 7th (b7)", "Major 9th (9)", "Major 13th (13)"],
+            description: "Warm, orchestral big-band dominant chord adding the bright 13th on top."
         )
     ]
 
-    /// Lookup chord quality by id or symbol
+    private static let idAliases: [String: String] = [
+        "diminished": "dim",
+        "augmented": "aug",
+        "m7": "min7",
+        "minor_7th": "min7",
+        "9th": "dom9",
+        "11th": "dom11",
+        "13th": "dom13",
+        "major_7th": "maj7",
+        "dominant_7th": "dom7",
+        "half_diminished": "m7b5"
+    ]
+
+    /// Lookup chord quality by id, alias, symbol, or name
     public static func chord(for id: String) -> ChordQualityModel? {
         let clean = id.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let normalized = clean.replacingOccurrences(of: "-", with: "_").replacingOccurrences(of: " ", with: "_")
+        let canonical = idAliases[clean] ?? idAliases[normalized] ?? normalized
 
         return allChords.first(where: {
             $0.id.lowercased() == clean ||
             $0.id.lowercased() == normalized ||
+            $0.id.lowercased() == canonical ||
             $0.symbol.lowercased() == clean ||
             $0.name.lowercased() == clean
         })

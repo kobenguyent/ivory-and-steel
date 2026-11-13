@@ -3,6 +3,7 @@
     "id": "quiz-p-1",
     "instrument": "piano",
     "level": "beginner",
+    "domain": "instrument_craft",
     "question": "When striking piano keys, which knuckle joint should you strictly prevent from collapsing backward?",
     "options": [
       "The wrist joint",
@@ -18,6 +19,7 @@
     "id": "quiz-p-2",
     "instrument": "piano",
     "level": "beginner",
+    "domain": "instrument_craft",
     "question": "What is the correct timing for \"syncopated pedaling\" on piano?",
     "options": [
       "Press the pedal down 2 beats before playing the chord",
@@ -33,6 +35,7 @@
     "id": "quiz-p-3",
     "instrument": "piano",
     "level": "intermediate",
+    "domain": "theory_spelling",
     "question": "In a jazz ii-V-I progression in C major (Dm7 -> G7 -> Cmaj7), what does the 7th of Dm7 (note C) resolve down to in the G7 chord?",
     "options": [
       "The root G",
@@ -42,12 +45,26 @@
     ],
     "correctIndex": 2,
     "explanation": "In smooth jazz voice leading, the 7th of the ii chord (C) steps down a half step to become the 3rd of the V7 chord (B).",
-    "relatedTipId": "piano-int-02"
+    "relatedTipId": "piano-int-02",
+    "audioCue": {
+      "style": "chordProgression",
+      "notes": [],
+      "progressions": [
+        ["D4", "F4", "A4", "C5"],
+        ["G3", "B3", "D4", "F4"],
+        ["C4", "E4", "G4", "B4"]
+      ],
+      "referenceRootNote": "C4",
+      "stepDuration": 0.78,
+      "isGuitar": false
+    },
+    "formulaBadge": "Dm7 (7th C) → G7 (3rd B) → Cmaj7 (3rd E / 7th B)"
   },
   {
     "id": "quiz-p-4",
     "instrument": "piano",
     "level": "intermediate",
+    "domain": "instrument_craft",
     "question": "What is the rhythmic subdivision composite for playing a 3:2 polyrhythm?",
     "options": [
       "Both -> Triple -> Duple -> Triple (\"Not Dif-fi-cult\")",
@@ -63,6 +80,7 @@
     "id": "quiz-p-5",
     "instrument": "piano",
     "level": "advanced",
+    "domain": "theory_spelling",
     "question": "In Bill Evans-style rootless voicings, which notes are typically omitted by the pianist?",
     "options": [
       "The 3rd and 7th",
@@ -72,12 +90,21 @@
     ],
     "correctIndex": 1,
     "explanation": "The bass player covers the root, and the pure 5th provides no harmonic color. Removing them frees fingers for extensions like 9ths and 13ths.",
-    "relatedTipId": "piano-adv-01"
+    "relatedTipId": "piano-adv-01",
+    "audioCue": {
+      "style": "harmonic",
+      "notes": ["F4", "A4", "C5", "E5"],
+      "referenceRootNote": "D4",
+      "stepDuration": 0.30,
+      "isGuitar": false
+    },
+    "formulaBadge": "Dm9 Rootless (Type A): ♭3 (F) – 5 (A) – ♭7 (C) – 9 (E)"
   },
   {
     "id": "quiz-p-6",
     "instrument": "piano",
     "level": "mastery",
+    "domain": "instrument_craft",
     "question": "What is the physical mechanism behind \"half-pedaling\" on an acoustic grand piano?",
     "options": [
       "Pressing the middle sostenuto pedal instead of the sustain pedal",
@@ -93,6 +120,7 @@
     "id": "quiz-g-1",
     "instrument": "guitar",
     "level": "beginner",
+    "domain": "instrument_craft",
     "question": "Where should your fretting fingertip be placed to eliminate fret buzz with minimal pressure?",
     "options": [
       "Directly on top of the metal fret wire",
@@ -108,6 +136,7 @@
     "id": "quiz-g-2",
     "instrument": "guitar",
     "level": "beginner",
+    "domain": "instrument_craft",
     "question": "When transitioning between G, Cadd9, and D chords, which finger serves as the stationary anchor finger on fret 3?",
     "options": [
       "Index finger on G string",
@@ -123,6 +152,7 @@
     "id": "quiz-g-3",
     "instrument": "guitar",
     "level": "intermediate",
+    "domain": "instrument_craft",
     "question": "What body mechanic should power the F-major barre chord to avoid burning thumb fatigue?",
     "options": [
       "Pinching the neck as hard as humanly possible with the thumb pad",
@@ -138,6 +168,7 @@
     "id": "quiz-g-4",
     "instrument": "guitar",
     "level": "intermediate",
+    "domain": "aural_modes",
     "question": "What is the characteristic color tone that distinguishes the Dorian mode from the standard Natural Minor (Aeolian) scale?",
     "options": [
       "The Flattened 2nd (b2)",
@@ -147,12 +178,21 @@
     ],
     "correctIndex": 1,
     "explanation": "Dorian contains a natural 6th (e.g., B natural in D Dorian), which gives it that signature bright, jazzy, Santana minor sound.",
-    "relatedTipId": "gtr-adv-03"
+    "relatedTipId": "gtr-adv-03",
+    "audioCue": {
+      "style": "scale",
+      "notes": ["D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5"],
+      "referenceRootNote": "D4",
+      "stepDuration": 0.25,
+      "isGuitar": true
+    },
+    "formulaBadge": "D Dorian: 1 – 2 – ♭3 – 4 – 5 – ♮6 (B) – ♭7"
   },
   {
     "id": "quiz-g-5",
     "instrument": "guitar",
     "level": "advanced",
+    "domain": "instrument_craft",
     "question": "In sweep picking, what is the most critical factor preventing notes from bleeding into a messy chord strum?",
     "options": [
       "Picking as loudly as possible with a thick pick",
@@ -168,6 +208,7 @@
     "id": "quiz-g-6",
     "instrument": "guitar",
     "level": "mastery",
+    "domain": "instrument_craft",
     "question": "How did Allan Holdsworth approach fretting hand mechanics for his liquid legato velocity?",
     "options": [
       "Heavy blunt force tapping with stiff forearm muscles",
@@ -178,5 +219,337 @@
     "correctIndex": 1,
     "explanation": "Holdsworth used low action, light gauge strings, and minimal finger motion with rapid finger snap and immediate release for violin-like fluid runs.",
     "relatedTipId": "gtr-mst-01"
+  },
+  {
+    "id": "quiz-t-7",
+    "instrument": "both",
+    "level": "beginner",
+    "domain": "theory_spelling",
+    "question": "On the Circle of Fifths, how many accidentals are in the key signature of E♭ Major?",
+    "options": [
+      "2 flats (B♭, E♭)",
+      "3 flats (B♭, E♭, A♭)",
+      "4 flats (B♭, E♭, A♭, D♭)",
+      "3 sharps (F♯, C♯, G♯)"
+    ],
+    "correctIndex": 1,
+    "explanation": "E♭ Major carries 3 flats in standard order of flats (B♭, E♭, A♭) and pairs with C Natural Minor as its relative minor.",
+    "relatedTipId": "both-uni-01",
+    "visualNotes": ["Eb4", "F4", "G4", "Ab4", "Bb4", "C5", "D5", "Eb5"],
+    "visualRoot": "Eb",
+    "visualPreferFlat": true,
+    "formulaBadge": "E♭ Major: E♭ – F – G – A♭ – B♭ – C – D"
+  },
+  {
+    "id": "quiz-t-8",
+    "instrument": "both",
+    "level": "intermediate",
+    "domain": "theory_spelling",
+    "question": "Why must the 7th scale degree of F♯ Major be written as E♯ rather than F♮?",
+    "options": [
+      "Because F♮ is out of tune in 12-TET",
+      "Because every diatonic major scale must contain all seven distinct letter names A–G exactly once",
+      "Because E♯ is one quarter-tone sharp of F♮ on piano",
+      "Because sharp keys can never contain white piano keys"
+    ],
+    "correctIndex": 1,
+    "explanation": "Strict 7-letter diatonic spelling assigns one unique letter per scale degree. Since degree 1 already uses the letter F (F♯), the leading tone (degree 7) must use an E-letter spelling: E♯.",
+    "relatedTipId": "both-uni-01",
+    "visualNotes": ["F#4", "G#4", "A#4", "B4", "C#5", "D#5", "E#5", "F#5"],
+    "visualRoot": "F#",
+    "formulaBadge": "F♯ – G♯ – A♯ – B – C♯ – D♯ – E♯"
+  },
+  {
+    "id": "quiz-t-9",
+    "instrument": "both",
+    "level": "intermediate",
+    "domain": "theory_spelling",
+    "question": "Which two chord tones form the restless tritone inside a G7 (dominant 7th) chord and how do they resolve into C Major?",
+    "options": [
+      "G and D resolve outward to A and C",
+      "B and F resolve in contrary motion by half-step to C and E",
+      "D and F collapse downward to B and D",
+      "G and B hold steady as common tones"
+    ],
+    "correctIndex": 1,
+    "explanation": "Inside G7 (G–B–D–F), the leading tone B (3rd) pulls up a half step to C, while the chordal 7th F pulls down a half step to E, creating Western harmony's flagship dominant resolution.",
+    "relatedTipId": "piano-int-02",
+    "audioCue": {
+      "style": "chordProgression",
+      "notes": [],
+      "progressions": [
+        ["G3", "B3", "D4", "F4"],
+        ["C4", "E4", "G4", "C5"]
+      ],
+      "referenceRootNote": "C4",
+      "stepDuration": 0.85,
+      "isGuitar": false
+    },
+    "formulaBadge": "G7 [B ↑ C  &  F ↓ E] → C"
+  },
+  {
+    "id": "quiz-t-10",
+    "instrument": "both",
+    "level": "advanced",
+    "domain": "theory_spelling",
+    "question": "Using traditional figured bass notation for 7th chords, what symbol denotes a 2nd-inversion dominant 7th chord (with the 5th in the bass)?",
+    "options": [
+      "7",
+      "6/5",
+      "4/3",
+      "4/2"
+    ],
+    "correctIndex": 2,
+    "explanation": "Abbreviated 7th-chord figured bass labels measure intervals above the bass tone: Root = 7, 1st inv = 6/5 (3rd in bass), 2nd inv = 4/3 (5th in bass), and 3rd inv = 4/2 (7th in bass).",
+    "relatedTipId": "piano-int-03",
+    "audioCue": {
+      "style": "arpeggiated",
+      "notes": ["D4", "F4", "G4", "B4"],
+      "referenceRootNote": "G4",
+      "stepDuration": 0.36,
+      "isGuitar": false
+    },
+    "formulaBadge": "G7/D (2nd Inversion · 4/3): D – F – G – B"
+  },
+  {
+    "id": "quiz-t-11",
+    "instrument": "both",
+    "level": "advanced",
+    "domain": "aural_chords",
+    "question": "How does a Half-Diminished 7th chord (m7♭5) structurally differ from a Fully Diminished 7th chord (dim7)?",
+    "options": [
+      "m7♭5 uses a major 3rd, whereas dim7 uses a minor 3rd",
+      "m7♭5 uses a minor 7th (♭7, 10 semitones), whereas dim7 uses a diminished 7th (𝄫7, 9 semitones)",
+      "m7♭5 omits the diminished 5th entirely",
+      "dim7 raises its root by a half step"
+    ],
+    "correctIndex": 1,
+    "explanation": "Both share a diminished triad base (1–♭3–♭5). Adding a ♭7 yields Half-Diminished (viiø7 in Major / iiø7 in Minor), while lowering the 7th another semitone to 𝄫7 yields symmetrical Fully Diminished 7th.",
+    "relatedTipId": "piano-mst-02",
+    "audioCue": {
+      "style": "harmonic",
+      "notes": ["B3", "D4", "F4", "A4"],
+      "referenceRootNote": "B3",
+      "stepDuration": 0.30,
+      "isGuitar": false
+    },
+    "formulaBadge": "Bm7♭5: B–D–F–A  vs  B°7: B–D–F–A♭"
+  },
+  {
+    "id": "quiz-t-12",
+    "instrument": "both",
+    "level": "beginner",
+    "domain": "aural_intervals",
+    "question": "By the conservatory Rule of 9, inverting an ascending Perfect 4th yields which complementary interval?",
+    "options": [
+      "Major 5th",
+      "Perfect 5th",
+      "Minor 6th",
+      "Tritone"
+    ],
+    "correctIndex": 1,
+    "explanation": "Applying Rule of 9: 9 − 4 = 5, and Perfect intervals remain Perfect upon inversion. Thus a Perfect 4th (5 semitones) inverts to a Perfect 5th (7 semitones).",
+    "relatedTipId": "both-uni-01",
+    "audioCue": {
+      "style": "melodic",
+      "notes": ["C4", "F4", "C5"],
+      "referenceRootNote": "C4",
+      "stepDuration": 0.48,
+      "isGuitar": false
+    },
+    "formulaBadge": "P4 (5 st) + P5 (7 st) = P8 (12 st)"
+  },
+  {
+    "id": "quiz-p-7",
+    "instrument": "piano",
+    "level": "intermediate",
+    "domain": "aural_modes",
+    "question": "Which single altered scale degree transforms Ionian (Major) into the dreamy, cinematic Lydian mode?",
+    "options": [
+      "Flattened 2nd (♭2)",
+      "Flattened 7th (♭7)",
+      "Raised 4th (♯4)",
+      "Flattened 3rd (♭3)"
+    ],
+    "correctIndex": 2,
+    "explanation": "Lydian is Major with a raised 4th (♯4), eliminating the avoid-note half step between degree 3 and 4 and yielding a bright tritone color above the tonic.",
+    "relatedTipId": "piano-adv-02",
+    "audioCue": {
+      "style": "scale",
+      "notes": ["F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5"],
+      "referenceRootNote": "F4",
+      "stepDuration": 0.25,
+      "isGuitar": false
+    },
+    "formulaBadge": "F Lydian: F – G – A – B (♯4) – C – D – E"
+  },
+  {
+    "id": "quiz-p-8",
+    "instrument": "piano",
+    "level": "advanced",
+    "domain": "aural_cadences",
+    "question": "In a Minor-Key iiø7 – V7♭9 – i cadence in C Minor, what harmonic function does the B natural inside G7 serve?",
+    "options": [
+      "Subdominant color tone borrowed from Phrygian",
+      "Raised leading tone borrowed from Harmonic Minor to create dominant–tonic resolution pull",
+      "Chromatic passing tone with no chordal function",
+      "Neapolitan 6th tonicizer"
+    ],
+    "correctIndex": 1,
+    "explanation": "Natural minor has a subtonic B♭ chord (v7). Raising degree 7 from B♭ to B♮ (from Harmonic Minor) converts V into an active dominant G7 chord pointing home to C Minor.",
+    "relatedTipId": "piano-int-02",
+    "audioCue": {
+      "style": "chordProgression",
+      "notes": [],
+      "progressions": [
+        ["D4", "F4", "Ab4", "C5"],
+        ["G3", "B3", "F4", "Ab4"],
+        ["C4", "Eb4", "G4", "C5"]
+      ],
+      "referenceRootNote": "C4",
+      "stepDuration": 0.80,
+      "isGuitar": false
+    },
+    "formulaBadge": "Dm7♭5 → G7♭9 → Cm"
+  },
+  {
+    "id": "quiz-p-9",
+    "instrument": "piano",
+    "level": "beginner",
+    "domain": "aural_cadences",
+    "question": "Which cadence moves from the Subdominant (IV) directly back to Tonic (I), producing the traditional 'Amen' harmonic sigh?",
+    "options": [
+      "Authentic Cadence (V → I)",
+      "Deceptive Cadence (V → vi)",
+      "Plagal Cadence (IV → I)",
+      "Phrygian Half Cadence (iv6 → V)"
+    ],
+    "correctIndex": 2,
+    "explanation": "A Plagal Cadence (IV → I) achieves gentle resolution without a leading-tone tritone, holding the tonic pitch class as a peaceful common tone.",
+    "relatedTipId": "piano-beg-04",
+    "audioCue": {
+      "style": "chordProgression",
+      "notes": [],
+      "progressions": [
+        ["C4", "E4", "G4"],
+        ["C4", "F4", "A4"],
+        ["C4", "E4", "G4"]
+      ],
+      "referenceRootNote": "C4",
+      "stepDuration": 0.78,
+      "isGuitar": false
+    },
+    "formulaBadge": "I (C) → IV (F/C) → I (C)"
+  },
+  {
+    "id": "quiz-g-7",
+    "instrument": "guitar",
+    "level": "beginner",
+    "domain": "instrument_craft",
+    "question": "Why are guitar frets spaced progressively closer together as you ascend toward the body of the guitar?",
+    "options": [
+      "Because wood shrinks near the soundhole",
+      "Because 12-TET pitch intervals follow an exponential geometric ratio (12th root of 2 per fret) of the remaining vibrating string length",
+      "To help small hands reach high notes faster",
+      "Because string tension doubles every three frets"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each ascending semitone shortens the vibrating scale length by a constant percentage factor (2^(-1/12) ≈ 5.61% of remaining string length), making each fret physically narrower up the neck.",
+    "relatedTipId": "gtr-beg-03",
+    "formulaBadge": "L_n = L_0 · 2^(-n/12)  (Fret 12 = Half Scale Length)"
+  },
+  {
+    "id": "quiz-g-8",
+    "instrument": "guitar",
+    "level": "intermediate",
+    "domain": "instrument_craft",
+    "question": "Because standard guitar tuning tunes strings in Perfect 4ths except one pair, moving any scale or chord shape onto the B string requires compensating by shifting:",
+    "options": [
+      "One fret lower toward the nut",
+      "One fret higher toward the bridge (compensating for the Major 3rd G→B tuning offset)",
+      "Two frets lower toward the headstock",
+      "Zero frets — all adjacent guitar strings are Perfect 4ths"
+    ],
+    "correctIndex": 1,
+    "explanation": "Standard tuning (E–A–D–G–B–E) shifts to a Major 3rd between strings 3 (G) and 2 (B) instead of a Perfect 4th. Compensate by moving shapes on the B/high-E boundary +1 fret toward the bridge.",
+    "relatedTipId": "gtr-int-03",
+    "formulaBadge": "E–(P4)–A–(P4)–D–(P4)–G–(M3!)–B–(P4)–E"
+  },
+  {
+    "id": "quiz-g-9",
+    "instrument": "guitar",
+    "level": "advanced",
+    "domain": "theory_spelling",
+    "question": "In the 6-note Blues Scale, which added chromatic tone creates the signature 'Blue Note' tension between the 4th and 5th?",
+    "options": [
+      "Major 3rd",
+      "Diminished 5th (♭5)",
+      "Major 7th",
+      "Minor 2nd (♭2)"
+    ],
+    "correctIndex": 1,
+    "explanation": "The Blues Scale adds a gritty diminished 5th (♭5, tritone above tonic) to Minor Pentatonic (1 – ♭3 – 4 – ♭5 – 5 – ♭7), producing expressive vocal bends into the natural 5th or 4th.",
+    "relatedTipId": "gtr-int-04",
+    "audioCue": {
+      "style": "scale",
+      "notes": ["A4", "C5", "D5", "Eb5", "E5", "G5", "A5"],
+      "referenceRootNote": "A4",
+      "stepDuration": 0.25,
+      "isGuitar": true
+    },
+    "formulaBadge": "A Blues: A – C – D – E♭ (♭5) – E – G"
+  },
+  {
+    "id": "quiz-t-13",
+    "instrument": "both",
+    "level": "intermediate",
+    "domain": "aural_modes",
+    "question": "What interval structure gives the Phrygian mode its unmistakable Spanish flamenco and dark metal tension right above the root?",
+    "options": [
+      "Whole step (M2) above root",
+      "Half step (♭2) between scale degrees 1 and 2",
+      "Augmented 4th above root",
+      "Raised 6th and natural 7th"
+    ],
+    "correctIndex": 1,
+    "explanation": "Phrygian is Natural Minor with a lowered 2nd degree (1 – ♭2 – ♭3 – 4 – 5 – ♭6 – ♭7). The immediate half step ♭2 → 1 mirrors V → I gravitational pull downward.",
+    "relatedTipId": "both-uni-03",
+    "audioCue": {
+      "style": "scale",
+      "notes": ["E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5"],
+      "referenceRootNote": "E4",
+      "stepDuration": 0.25,
+      "isGuitar": false
+    },
+    "formulaBadge": "E Phrygian: E – F (♭2) – G – A – B – C – D"
+  },
+  {
+    "id": "quiz-t-14",
+    "instrument": "both",
+    "level": "mastery",
+    "domain": "aural_cadences",
+    "question": "What harmonic substitution replaces V7 (such as G7 resolving to Cmaj7) with another dominant 7th rooted a tritone away (D♭7) that shares the exact same guide-tone tritone?",
+    "options": [
+      "Secondary Subdominant Substitution",
+      "Tritone Substitution (♭II7 → Imaj7)",
+      "Backdoor Plagal Cadence (♭VII7 → I)",
+      "Parallel Minor Interchange"
+    ],
+    "correctIndex": 1,
+    "explanation": "G7 (B and F) and D♭7 (C♭/B and F) share the identical enharmonic tritone guide tones (B/F). Substituting D♭7 creates smooth chromatic bass motion: Dm7 → D♭7 → Cmaj7.",
+    "relatedTipId": "piano-mst-03",
+    "audioCue": {
+      "style": "chordProgression",
+      "notes": [],
+      "progressions": [
+        ["D4", "F4", "A4", "C5"],
+        ["Db4", "F4", "Ab4", "B4"],
+        ["C4", "E4", "G4", "B4"]
+      ],
+      "referenceRootNote": "C4",
+      "stepDuration": 0.82,
+      "isGuitar": false
+    },
+    "formulaBadge": "Dm7 → D♭7 (shares B/F tritone with G7) → Cmaj7"
   }
 ]

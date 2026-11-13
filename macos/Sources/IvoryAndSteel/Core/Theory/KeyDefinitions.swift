@@ -85,7 +85,7 @@ public enum KeyDefinitions {
             keySignatureDesc: "6 Sharps (F♯, C♯, G♯, D♯, A♯, E♯)",
             relativeMinor: "D# Minor",
             relativeMinorRoot: "D#",
-            majorScaleNotes: ["F#", "G#", "A#", "B", "C#", "D#", "F"]
+            majorScaleNotes: ["F#", "G#", "A#", "B", "C#", "D#", "E#"]
         ),
         KeyInfoModel(
             root: "Db",

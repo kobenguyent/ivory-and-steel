@@ -96,19 +96,19 @@ public final class AudioEngine: AudioEngineProtocol, @unchecked Sendable {
     
     // MARK: - Pre-Computed Buffer Caching
     
-    /// Pre-renders PCM buffers for common concert piano register (C3-C6, MIDI 48-84)
+    /// Pre-renders PCM buffers for common concert piano register (C2-C6, MIDI 36-84)
     /// and standard guitar register (E2-E5, MIDI 40-76).
     public func precomputeCommonRegister() {
         lock.lock()
         defer { lock.unlock() }
         
-        // Common Piano Register (C3 to C6)
-        for midi in 48...84 {
+        // Common Piano Register (C2 to C6)
+        for midi in 36...84 {
             let key = CacheKey(instrument: "piano", midi: midi)
             if let buffer = DSPMath.renderPianoBuffer(
                 midi: midi,
                 velocity: 0.80,
-                duration: 1.6,
+                duration: 1.8,
                 sampleRate: sampleRate,
                 format: standardFormat
             ) {
@@ -168,7 +168,7 @@ public final class AudioEngine: AudioEngineProtocol, @unchecked Sendable {
         startEngine()
         
         let key = CacheKey(instrument: "piano", midi: midi)
-        let isStandardProfile = abs(velocity - 0.80) <= 0.05 && abs(duration - 1.6) <= 0.1
+        let isStandardProfile = abs(velocity - 0.80) <= 0.08 && abs(duration - 1.8) <= 0.35
         
         let bufferToPlay: AVAudioPCMBuffer?
         

@@ -214,8 +214,12 @@ public enum DSPMath: Sendable {
     
     // MARK: - Full Discrete-Time Buffer Rendering
     
-    /// Renders an acoustic piano tone with Steinway overtones, dynamic lowpass dampening,
-    /// and clickless ADSR envelope.
+    /// Renders an acoustic concert grand piano tone with:
+    /// - Pitch-dependent string stiffness inharmonicity (f_k = k * f0 * sqrt(1 + B * k^2))
+    /// - 10 Nyquist-safe partials with velocity-sensitive hammer brightness and per-partial decay
+    /// - Trichord unison detuning for organic acoustic chorus and beating
+    /// - Felt hammer strike transient and soundboard body resonance
+    /// - Natural stereo piano imaging (bass left, treble right) and clickless non-zero floor.
     public static func renderPianoBuffer(
         midi: Int,
         velocity: Float,
@@ -226,52 +230,178 @@ public enum DSPMath: Sendable {
         let frameCount = sampleFrameCount(duration: duration, sampleRate: sampleRate)
         guard frameCount > 0 else { return nil }
         
-        let freq = midiToFrequency(midi: midi)
+        let clampedMidi = max(21, min(108, midi))
+        let clampedVelocity = Double(max(0.05, min(1.0, velocity)))
+        let freq = midiToFrequency(midi: clampedMidi)
         let audioFormat = format ?? AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
         guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: AVAudioFrameCount(frameCount)) else {
             return nil
         }
         pcmBuffer.frameLength = AVAudioFrameCount(frameCount)
         
-        var samples = [Float](repeating: 0.0, count: frameCount)
+        let channelCount = Int(audioFormat.channelCount)
+        var leftSamples = [Float](repeating: 0.0, count: frameCount)
+        var rightSamples = [Float](repeating: 0.0, count: frameCount)
         
-        // Dynamic Direct Form II Transposed lowpass filter
-        // Sweeps cutoff from min(freq * 6, 8000Hz) down to min(freq * 2, 2500Hz)
-        let initialCutoff = min(freq * 6.0, 8000.0)
-        let finalCutoff = min(freq * 2.0, 2500.0)
-        var biquad = DirectForm2TransposedBiquad()
-        biquad.configureLowpass(cutoff: initialCutoff, q: 0.7071, sampleRate: sampleRate)
+        // String stiffness inharmonicity coefficient B (scales with pitch)
+        let inharmonicityB = max(0.00005, min(0.003, 0.00014 * pow(2.0, Double(clampedMidi - 60) / 18.0)))
         
-        let updateInterval = max(1, Int(sampleRate * 0.01)) // update filter coefficients every 10ms
+        // Pitch-dependent overall decay scaling (bass sustains longer, treble decays faster)
+        let pitchDecayScale = max(0.45, min(2.4, pow(2.0, Double(60 - clampedMidi) / 28.0)))
+        
+        // Partial weights (10 partials) with velocity-dependent brightness roll-off
+        let baseWeights: [Double] = [1.00, 0.50, 0.27, 0.15, 0.09, 0.055, 0.035, 0.022, 0.014, 0.009]
+        let nyquistLimit = sampleRate * 0.44
+        
+        struct PartialState {
+            let phaseInc: Double
+            var phase: Double
+            var amp: Double
+            let decayPerSample: Double
+        }
+        
+        var partials: [PartialState] = []
+        partials.reserveCapacity(baseWeights.count)
+        
+        for (idx, weight) in baseWeights.enumerated() {
+            let k = Double(idx + 1)
+            let partialFreq = k * freq * sqrt(1.0 + inharmonicityB * k * k)
+            if partialFreq >= nyquistLimit { break }
+            
+            // Softer velocity dulls upper harmonics like a real felt hammer
+            let brightnessFactor = pow(clampedVelocity, 0.25 + Double(idx) * 0.14)
+            let amp = weight * brightnessFactor
+            
+            // Higher partials decay faster than the fundamental; bass notes decay slower
+            let baseDecayRate = (0.75 + 0.55 * pow(k, 1.32)) / pitchDecayScale
+            let decayPerSample = exp(-baseDecayRate / sampleRate)
+            
+            partials.append(PartialState(
+                phaseInc: 2.0 * Double.pi * partialFreq / sampleRate,
+                phase: 0.0,
+                amp: amp,
+                decayPerSample: decayPerSample
+            ))
+        }
+        
+        // Trichord unison detuning for partials 1..3 (real grand pianos have 2-3 strings per key)
+        // Gives natural acoustic shimmer and stereo width without harsh phasing
+        let detuneCents = clampedMidi >= 45 ? 0.65 : 0.30
+        let detuneRatio = pow(2.0, detuneCents / 1200.0)
+        var unison1Phase: Double = 0.21
+        let unison1Inc = 2.0 * Double.pi * (freq * detuneRatio) / sampleRate
+        var unison2Phase: Double = 1.07
+        let unison2Inc = 2.0 * Double.pi * (freq * 2.0 / detuneRatio) / sampleRate
+        let unisonDecay1 = exp(-(0.85 / pitchDecayScale) / sampleRate)
+        let unisonDecay2 = exp(-(1.45 / pitchDecayScale) / sampleRate)
+        var unisonAmp1 = 0.34 * clampedVelocity
+        var unisonAmp2 = 0.16 * pow(clampedVelocity, 0.4)
+        
+        // Felt hammer strike transient (percussive woody knock + damped felt noise in first ~18ms)
+        let hammerFreq = min(freq * 1.4 + 140.0, 820.0)
+        let hammerInc = 2.0 * Double.pi * hammerFreq / sampleRate
+        var hammerPhase: Double = 0.0
+        var hammerAmp = 0.16 * pow(clampedVelocity, 0.85)
+        let hammerDecay = exp(-180.0 / sampleRate) // ~5.5ms time constant
+        
+        // Fast 3ms attack + compound release toward end of buffer
+        let attackSamples = max(1, Int(0.003 * sampleRate))
+        let releaseStartFrame = max(attackSamples, Int(Double(frameCount) * 0.72))
+        let releaseFrames = max(1, frameCount - releaseStartFrame)
+        
+        // Warm soundboard lowpass filter (gentle, opens on attack and mellows smoothly)
+        let initialCutoff = min(freq * 8.0 + 1200.0, 9500.0)
+        let finalCutoff = min(freq * 2.6 + 350.0, 3200.0)
+        var biquadL = DirectForm2TransposedBiquad()
+        var biquadR = DirectForm2TransposedBiquad()
+        biquadL.configureLowpass(cutoff: initialCutoff, q: 0.7071, sampleRate: sampleRate)
+        biquadR.configureLowpass(cutoff: initialCutoff, q: 0.7071, sampleRate: sampleRate)
+        let updateInterval = max(1, Int(sampleRate * 0.01))
+        
+        // Stereo panorama: bass slightly left, middle centered, treble slightly right
+        let pan = max(-0.32, min(0.32, (Double(clampedMidi - 60) / 36.0) * 0.32))
+        let leftGain = Float(cos((pan + 1.0) * Double.pi / 4.0))
+        let rightGain = Float(sin((pan + 1.0) * Double.pi / 4.0))
+        
+        // Calibrated output level so single notes are clear and 4-note chords never clip
+        let masterScale = 0.30 * clampedVelocity
+        
+        // Deterministic LCG for subtle felt hammer noise (zero global state)
+        var noiseSeed: UInt32 = UInt32(clampedMidi * 2654435761 & 0xFFFF_FFFF)
         
         for frame in 0..<frameCount {
-            let t = Double(frame) / sampleRate
-            
-            // Periodically sweep cutoff for acoustic warmth
             if frame % updateInterval == 0 {
-                let progress = min(1.0, t / duration)
+                let progress = Double(frame) / Double(frameCount)
                 let currentCutoff = initialCutoff * pow(finalCutoff / initialCutoff, progress)
-                biquad.configureLowpass(cutoff: currentCutoff, q: 0.7071, sampleRate: sampleRate)
+                biquadL.configureLowpass(cutoff: currentCutoff, q: 0.7071, sampleRate: sampleRate)
+                biquadR.configureLowpass(cutoff: currentCutoff, q: 0.7071, sampleRate: sampleRate)
             }
             
-            let rawSample = pianoOvertoneSample(fundamentalFreq: freq, time: t)
-            let filtered = biquad.process(sample: rawSample)
-            let env = pianoEnvelope(time: t, duration: duration, velocity: velocity)
+            var monoBody = 0.0
+            for i in 0..<partials.count {
+                monoBody += partials[i].amp * sin(partials[i].phase)
+                partials[i].phase += partials[i].phaseInc
+                partials[i].amp *= partials[i].decayPerSample
+            }
             
-            let sampleVal = Float(filtered) * env
-            // Strict clipping protection
-            samples[frame] = max(-1.0, min(1.0, sampleVal))
+            // Unison detuned strings contribute subtle stereo chorus
+            let u1 = unisonAmp1 * sin(unison1Phase)
+            let u2 = unisonAmp2 * sin(unison2Phase)
+            unison1Phase += unison1Inc
+            unison2Phase += unison2Inc
+            unisonAmp1 *= unisonDecay1
+            unisonAmp2 *= unisonDecay2
+            
+            // Felt hammer transient
+            var hammer = 0.0
+            if hammerAmp > 0.0002 {
+                noiseSeed = noiseSeed &* 1664525 &+ 1013904223
+                let white = (Double(noiseSeed >> 16) / 32768.0) - 1.0
+                hammer = hammerAmp * (0.70 * sin(hammerPhase) + 0.30 * white)
+                hammerPhase += hammerInc
+                hammerAmp *= hammerDecay
+            }
+            
+            // Smooth 3ms attack + natural release tail down to envelopeFloor
+            var env = 1.0
+            if frame < attackSamples {
+                let t = Double(frame) / Double(attackSamples)
+                env = Double(envelopeFloor) + (1.0 - Double(envelopeFloor)) * sin(t * Double.pi / 2.0)
+            } else if frame >= releaseStartFrame {
+                let t = Double(frame - releaseStartFrame) / Double(releaseFrames)
+                env = max(Double(envelopeFloor), pow(Double(envelopeFloor), t * 0.65))
+            }
+            
+            // Normalize harmonic sum (~1.8 peak) into clean [-1, 1] range
+            let rawL = (monoBody + u1 * 0.85 + u2 * 0.65 + hammer) * 0.56
+            let rawR = (monoBody + u1 * 0.65 + u2 * 0.85 + hammer) * 0.56
+            
+            let filtL = biquadL.process(sample: rawL)
+            let filtR = biquadR.process(sample: rawR)
+            
+            let outL = Float(filtL * env * masterScale) * (channelCount > 1 ? leftGain * 1.414 : 1.0)
+            let outR = Float(filtR * env * masterScale) * (channelCount > 1 ? rightGain * 1.414 : 1.0)
+            
+            leftSamples[frame] = max(-1.0, min(1.0, outL))
+            rightSamples[frame] = max(-1.0, min(1.0, outR))
         }
         
         // Micro-fade at end to guarantee zero DC offset / click
-        applyCosineFadeOut(samples: &samples, sampleRate: sampleRate, fadeDuration: 0.004)
+        applyCosineFadeOut(samples: &leftSamples, sampleRate: sampleRate, fadeDuration: 0.004)
+        if channelCount > 1 {
+            applyCosineFadeOut(samples: &rightSamples, sampleRate: sampleRate, fadeDuration: 0.004)
+        }
         
         // Copy to AVAudioPCMBuffer
         guard let channelData = pcmBuffer.floatChannelData else { return nil }
-        for channel in 0..<Int(audioFormat.channelCount) {
-            let channelPtr = channelData[channel]
+        let leftPtr = channelData[0]
+        for frame in 0..<frameCount {
+            leftPtr[frame] = leftSamples[frame]
+        }
+        if channelCount > 1 {
+            let rightPtr = channelData[1]
             for frame in 0..<frameCount {
-                channelPtr[frame] = samples[frame]
+                rightPtr[frame] = rightSamples[frame]
             }
         }
         

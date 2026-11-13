@@ -66,21 +66,21 @@ public struct HarmonicRoleBadge: View {
             Text(displayTitle)
                 .font(.system(size: size.fontSize, weight: isRoot ? .bold : .medium, design: .monospaced))
                 .tracking(0.6)
-                .foregroundColor(isRoot ? Color.musicianEbony : Color.white.opacity(0.85))
+                .foregroundColor(isRoot ? Color.musicianEbony : Color.musicianIvory)
         }
         .padding(.horizontal, size.horizontalPadding)
         .padding(.vertical, size.verticalPadding)
         .background(
             isRoot
                 ? Color.musicianGold
-                : Color.white.opacity(0.08)
+                : Color(hex: 0x181C26).opacity(0.92)
         )
         .clipShape(Capsule())
         .overlay(
             Capsule()
                 .strokeBorder(
-                    isRoot ? Color.musicianGoldLight.opacity(0.6) : Color.white.opacity(0.1),
-                    lineWidth: 0.6
+                    isRoot ? Color.musicianGoldLight.opacity(0.75) : Color.white.opacity(0.18),
+                    lineWidth: 0.7
                 )
         )
     }

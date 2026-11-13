@@ -35,7 +35,7 @@ public enum StudioViewMode: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .diatonic: return "circle.grid.cross"
         case .scales: return "music.note.list"
-        case .chords: return "sparkles"
+        case .chords: return "music.note"
         }
     }
 }
@@ -99,25 +99,29 @@ public enum StudioPresets {
     ]
     
     public static let chords: [StudioChordItem] = [
-        // Triads
+        // Triads & Suspended
         StudioChordItem(id: "major", name: "Major Triad", category: .triads),
         StudioChordItem(id: "minor", name: "Minor Triad", category: .triads),
-        StudioChordItem(id: "diminished", name: "Diminished Triad", category: .triads),
-        StudioChordItem(id: "augmented", name: "Augmented Triad", category: .triads),
+        StudioChordItem(id: "dim", name: "Diminished Triad", category: .triads),
+        StudioChordItem(id: "aug", name: "Augmented Triad", category: .triads),
+        StudioChordItem(id: "sus2", name: "Suspended 2nd (sus2)", category: .triads),
         StudioChordItem(id: "sus4", name: "Suspended 4th (sus4)", category: .triads),
         
         // 7ths
         StudioChordItem(id: "dom7", name: "Dominant 7th", category: .sevenths),
         StudioChordItem(id: "maj7", name: "Major 7th", category: .sevenths),
-        StudioChordItem(id: "m7", name: "Minor 7th", category: .sevenths),
+        StudioChordItem(id: "min7", name: "Minor 7th", category: .sevenths),
         StudioChordItem(id: "m7b5", name: "Half-Diminished (m7♭5)", category: .sevenths),
         StudioChordItem(id: "dim7", name: "Diminished 7th", category: .sevenths),
         
-        // Extended
-        StudioChordItem(id: "9th", name: "Dominant 9th", category: .extended),
+        // Extended & Color
+        StudioChordItem(id: "add9", name: "Added 9th (add9)", category: .extended),
+        StudioChordItem(id: "dom9", name: "Dominant 9th", category: .extended),
         StudioChordItem(id: "maj9", name: "Major 9th", category: .extended),
-        StudioChordItem(id: "11th", name: "Dominant 11th", category: .extended),
-        StudioChordItem(id: "13th", name: "Dominant 13th", category: .extended)
+        StudioChordItem(id: "min9", name: "Minor 9th", category: .extended),
+        StudioChordItem(id: "dom11", name: "Dominant 11th", category: .extended),
+        StudioChordItem(id: "min11", name: "Minor 11th", category: .extended),
+        StudioChordItem(id: "dom13", name: "Dominant 13th", category: .extended)
     ]
     
     public static let heroScaleChips = [
@@ -131,7 +135,8 @@ public enum StudioPresets {
         (id: "major", label: "Major"),
         (id: "minor", label: "Minor"),
         (id: "dom7", label: "7th"),
-        (id: "maj7", label: "Maj7")
+        (id: "maj7", label: "Maj7"),
+        (id: "min7", label: "m7")
     ]
 }
 
@@ -145,6 +150,8 @@ public struct StudioSelectorBar: View {
     @Binding public var selectedChordId: String
     
     public let onPlayAudition: (() -> Void)?
+    
+    @Namespace private var selectorBarNS
     
     public init(
         instrument: Binding<StudioInstrument>,
@@ -163,38 +170,50 @@ public struct StudioSelectorBar: View {
     }
     
     public var body: some View {
-        HStack(spacing: 8) {
-            // 1. Instrument Switcher (Piano / Guitar)
-            instrumentToggleGroup
-            
-            dividerLine
-            
-            // 2. View Mode Tabs (Diatonic / Scales / Chords - Unwrapped, zero truncation)
+        HStack(spacing: 10) {
+            // 1. View Mode Tabs (Diatonic / Scales / Chords)
             viewModeToggleGroup
-            
-            dividerLine
-            
-            // 3. Root Key Selector Menu
-            rootKeyPickerMenu
-            
-            dividerLine
-            
-            // 4. Contextual Menus & Steppers
+
+            // 2. Contextual Menus & Steppers (when in Scales or Chords mode)
             if viewMode == .scales {
+                dividerLine
                 scaleGroupedMenu
                 scaleAuditionSteppers
             } else if viewMode == .chords {
+                dividerLine
                 chordGroupedMenu
                 chordAuditionSteppers
-            } else {
-                diatonicSuiteBadge
             }
-            
+
             Spacer(minLength: 4)
-            
-            // 5. Quick Chips (Clean neutral frosted buttons)
+
+            // 3. Quick Chips & Audition Instrument / Play
             heroQuickChips
+                .transition(.studioPill)
+
+            instrumentToggleGroup
+
+            if let onPlayAudition {
+                Button(action: onPlayAudition) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 8.5, weight: .bold))
+                        Text(viewMode == .scales ? "Play Scale" : "Play")
+                            .font(.system(size: 10, weight: .bold))
+                            .contentTransition(.numericText())
+                    }
+                    .foregroundColor(Color.musicianEbony)
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(Color.musicianGold)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                .studioPressable()
+                .fixedSize(horizontal: true, vertical: false)
+                .help("Audition active \(viewMode.shortTitle.lowercased())")
+            }
         }
+        .animation(StudioMotion.snappyControl, value: viewMode)
         .padding(.horizontal, 8)
         .frame(height: 40)
         .background(Color.musicianCard)
@@ -218,15 +237,24 @@ public struct StudioSelectorBar: View {
         HStack(spacing: 2) {
             ForEach(StudioInstrument.allCases) { inst in
                 let isSelected = (instrument == inst)
-                Button(action: { instrument = inst }) {
+                Button(action: {
+                    withAnimation(StudioMotion.snappyControl) {
+                        instrument = inst
+                    }
+                }) {
                     Image(systemName: inst.icon)
                         .font(.system(size: 11, weight: isSelected ? .bold : .medium))
                         .foregroundColor(isSelected ? Color.musicianGold : Color.white.opacity(0.55))
                         .frame(width: 26, height: 26)
-                        .background(isSelected ? Color.white.opacity(0.1) : Color.clear)
-                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .background {
+                            if isSelected {
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(Color.white.opacity(0.11))
+                                    .matchedGeometryEffect(id: "selector_instrument_pill", in: selectorBarNS)
+                            }
+                        }
                 }
-                .buttonStyle(.plain)
+                .studioPressable()
                 .help("Switch to \(inst.rawValue)")
             }
         }
@@ -241,26 +269,31 @@ public struct StudioSelectorBar: View {
         HStack(spacing: 2) {
             ForEach(StudioViewMode.allCases) { mode in
                 let isSelected = (viewMode == mode)
-                Button(action: { viewMode = mode }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: mode.icon)
-                            .font(.system(size: 9))
-                        Text(mode.shortTitle)
-                            .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
+                Button(action: {
+                    withAnimation(StudioMotion.snappyControl) {
+                        viewMode = mode
                     }
-                    .foregroundColor(isSelected ? Color.musicianIvory : Color.white.opacity(0.55))
-                    .padding(.horizontal, 8)
-                    .frame(height: 26)
-                    .background(isSelected ? Color.white.opacity(0.12) : Color.clear)
-                    .clipShape(RoundedRectangle(cornerRadius: 5))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .strokeBorder(isSelected ? Color.white.opacity(0.15) : Color.clear, lineWidth: 0.6)
-                    )
+                }) {
+                    Text(mode.shortTitle)
+                        .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .foregroundColor(isSelected ? Color.musicianIvory : Color.white.opacity(0.55))
+                        .padding(.horizontal, 10)
+                        .frame(height: 26)
+                        .background {
+                            if isSelected {
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(Color.white.opacity(0.12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .strokeBorder(Color.white.opacity(0.15), lineWidth: 0.6)
+                                    )
+                                    .matchedGeometryEffect(id: "selector_viewmode_pill", in: selectorBarNS)
+                            }
+                        }
                 }
-                .buttonStyle(.plain)
+                .studioPressable()
             }
         }
         .padding(2)
@@ -268,132 +301,104 @@ public struct StudioSelectorBar: View {
         .clipShape(RoundedRectangle(cornerRadius: 7))
     }
     
-    // MARK: - 3. Root Key Picker Menu
-    
-    private var rootKeyPickerMenu: some View {
-        Menu {
-            ForEach(StudioPresets.chromaticRoots, id: \.self) { root in
-                Button(action: { selectedRoot = root }) {
-                    HStack {
-                        Text("Key of \(root)")
-                        if selectedRoot == root {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text("Key:")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(Color.white.opacity(0.5))
-                Text(selectedRoot.replacingOccurrences(of: "b", with: "♭").replacingOccurrences(of: "#", with: "♯"))
-                    .font(.system(size: 11.5, weight: .bold))
-                    .foregroundColor(Color.musicianGoldLight)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: 7.5, weight: .bold))
-                    .foregroundColor(Color.white.opacity(0.4))
-            }
-            .padding(.horizontal, 7)
-            .frame(height: 26)
-            .background(Color.white.opacity(0.04))
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.white.opacity(0.08), lineWidth: 0.6))
-        }
-        .buttonStyle(.plain)
-        .fixedSize(horizontal: true, vertical: false)
-    }
-    
-    // MARK: - 4. Grouped Quality Menus (Scales / Chords / Diatonic)
+    // MARK: - 3. Grouped Quality Menus (Scales / Chords)
     
     private var scaleGroupedMenu: some View {
-        Menu {
-            ForEach(StudioScaleItem.Category.allCases, id: \.rawValue) { category in
-                Section(category.rawValue) {
-                    ForEach(StudioPresets.scales.filter { $0.category == category }) { item in
-                        Button(action: {
-                            selectedScaleId = item.id
-                            onPlayAudition?()
-                        }) {
-                            HStack {
-                                Text(item.name)
-                                if selectedScaleId == item.id {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
+        let options = StudioScaleItem.Category.allCases.flatMap { category in
+            StudioPresets.scales
+                .filter { $0.category == category }
+                .map { item in
+                    LuxuryDropdownOption(
+                        value: item.id,
+                        title: item.name,
+                        section: category.rawValue
+                    )
                 }
-            }
-        } label: {
+        }
+        
+        return LuxuryDropdown(
+            selection: $selectedScaleId,
+            options: options,
+            popoverWidth: 255,
+            maxPopoverHeight: 340,
+            shape: .rounded(5),
+            onSelect: { _ in onPlayAudition?() }
+        ) { isOpen, isHovered in
             HStack(spacing: 5) {
                 Text(currentScaleName)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color.musicianIvory)
+                    .foregroundColor(isOpen ? Color.musicianGoldLight : Color.musicianIvory)
                     .lineLimit(1)
-                Image(systemName: "chevron.up.chevron.down")
+                Image(systemName: "chevron.down")
                     .font(.system(size: 7.5, weight: .bold))
-                    .foregroundColor(Color.white.opacity(0.4))
+                    .foregroundColor(isOpen ? Color.musicianGold : Color.white.opacity(0.45))
+                    .rotationEffect(.degrees(isOpen ? 180 : 0))
+                    .animation(.spring(response: 0.28, dampingFraction: 0.78), value: isOpen)
             }
             .padding(.horizontal, 8)
             .frame(height: 26)
-            .background(Color.white.opacity(0.06))
+            .background(isOpen ? Color.white.opacity(0.11) : (isHovered ? Color.white.opacity(0.085) : Color.white.opacity(0.06)))
             .clipShape(RoundedRectangle(cornerRadius: 5))
-            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.white.opacity(0.1), lineWidth: 0.6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .strokeBorder(
+                        isOpen ? Color.musicianGold.opacity(0.6) : (isHovered ? Color.white.opacity(0.2) : Color.white.opacity(0.1)),
+                        lineWidth: isOpen ? 0.9 : 0.6
+                    )
+            )
         }
-        .buttonStyle(.plain)
         .fixedSize(horizontal: true, vertical: false)
     }
     
     private var chordGroupedMenu: some View {
-        Menu {
-            ForEach(StudioChordItem.Category.allCases, id: \.rawValue) { category in
-                Section(category.rawValue) {
-                    ForEach(StudioPresets.chords.filter { $0.category == category }) { item in
-                        Button(action: {
-                            selectedChordId = item.id
-                            onPlayAudition?()
-                        }) {
-                            HStack {
-                                Text(item.name)
-                                if selectedChordId == item.id {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
+        let options = StudioChordItem.Category.allCases.flatMap { category in
+            StudioPresets.chords
+                .filter { $0.category == category }
+                .map { item in
+                    let sym = ChordDefinitions.chord(for: item.id)?.symbol
+                        .replacingOccurrences(of: "b", with: "♭")
+                        .replacingOccurrences(of: "#", with: "♯")
+                    return LuxuryDropdownOption(
+                        value: item.id,
+                        title: item.name,
+                        badge: (sym?.isEmpty == false) ? sym : nil,
+                        section: category.rawValue
+                    )
                 }
-            }
-        } label: {
+        }
+        
+        return LuxuryDropdown(
+            selection: $selectedChordId,
+            options: options,
+            popoverWidth: 255,
+            maxPopoverHeight: 350,
+            shape: .rounded(5),
+            onSelect: { _ in onPlayAudition?() }
+        ) { isOpen, isHovered in
             HStack(spacing: 5) {
                 Text(currentChordName)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color.musicianIvory)
+                    .foregroundColor(isOpen ? Color.musicianGoldLight : Color.musicianIvory)
                     .lineLimit(1)
-                Image(systemName: "chevron.up.chevron.down")
+                Image(systemName: "chevron.down")
                     .font(.system(size: 7.5, weight: .bold))
-                    .foregroundColor(Color.white.opacity(0.4))
+                    .foregroundColor(isOpen ? Color.musicianGold : Color.white.opacity(0.45))
+                    .rotationEffect(.degrees(isOpen ? 180 : 0))
+                    .animation(.spring(response: 0.28, dampingFraction: 0.78), value: isOpen)
             }
             .padding(.horizontal, 8)
             .frame(height: 26)
-            .background(Color.white.opacity(0.06))
+            .background(isOpen ? Color.white.opacity(0.11) : (isHovered ? Color.white.opacity(0.085) : Color.white.opacity(0.06)))
             .clipShape(RoundedRectangle(cornerRadius: 5))
-            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.white.opacity(0.1), lineWidth: 0.6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .strokeBorder(
+                        isOpen ? Color.musicianGold.opacity(0.6) : (isHovered ? Color.white.opacity(0.2) : Color.white.opacity(0.1)),
+                        lineWidth: isOpen ? 0.9 : 0.6
+                    )
+            )
         }
-        .buttonStyle(.plain)
         .fixedSize(horizontal: true, vertical: false)
-    }
-    
-    private var diatonicSuiteBadge: some View {
-        Text("I – ii – iii – IV – V – vi – vii°")
-            .font(.system(size: 9.5, weight: .semibold, design: .monospaced))
-            .foregroundColor(Color.musicianGoldLight.opacity(0.85))
-            .padding(.horizontal, 8)
-            .frame(height: 26)
-            .background(Color.white.opacity(0.04))
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.white.opacity(0.08), lineWidth: 0.6))
-            .fixedSize(horizontal: true, vertical: false)
     }
     
     // MARK: - Audition Steppers (◀ / ▶)
@@ -404,8 +409,10 @@ public struct StudioSelectorBar: View {
         
         return HStack(spacing: 2) {
             Button(action: {
-                let prevIdx = (currentIndex - 1 + allScales.count) % allScales.count
-                selectedScaleId = allScales[prevIdx].id
+                withAnimation(StudioMotion.snappyControl) {
+                    let prevIdx = (currentIndex - 1 + allScales.count) % allScales.count
+                    selectedScaleId = allScales[prevIdx].id
+                }
                 onPlayAudition?()
             }) {
                 Image(systemName: "chevron.left")
@@ -419,10 +426,13 @@ public struct StudioSelectorBar: View {
             Text("\(currentIndex + 1)/\(allScales.count)")
                 .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                 .foregroundColor(Color.white.opacity(0.5))
+                .contentTransition(.numericText())
             
             Button(action: {
-                let nextIdx = (currentIndex + 1) % allScales.count
-                selectedScaleId = allScales[nextIdx].id
+                withAnimation(StudioMotion.snappyControl) {
+                    let nextIdx = (currentIndex + 1) % allScales.count
+                    selectedScaleId = allScales[nextIdx].id
+                }
                 onPlayAudition?()
             }) {
                 Image(systemName: "chevron.right")
@@ -446,8 +456,10 @@ public struct StudioSelectorBar: View {
         
         return HStack(spacing: 2) {
             Button(action: {
-                let prevIdx = (currentIndex - 1 + allChords.count) % allChords.count
-                selectedChordId = allChords[prevIdx].id
+                withAnimation(StudioMotion.snappyControl) {
+                    let prevIdx = (currentIndex - 1 + allChords.count) % allChords.count
+                    selectedChordId = allChords[prevIdx].id
+                }
                 onPlayAudition?()
             }) {
                 Image(systemName: "chevron.left")
@@ -461,10 +473,13 @@ public struct StudioSelectorBar: View {
             Text("\(currentIndex + 1)/\(allChords.count)")
                 .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                 .foregroundColor(Color.white.opacity(0.5))
+                .contentTransition(.numericText())
             
             Button(action: {
-                let nextIdx = (currentIndex + 1) % allChords.count
-                selectedChordId = allChords[nextIdx].id
+                withAnimation(StudioMotion.snappyControl) {
+                    let nextIdx = (currentIndex + 1) % allChords.count
+                    selectedChordId = allChords[nextIdx].id
+                }
                 onPlayAudition?()
             }) {
                 Image(systemName: "chevron.right")
@@ -490,7 +505,9 @@ public struct StudioSelectorBar: View {
                 ForEach(StudioPresets.heroScaleChips, id: \.id) { chip in
                     let isSelected = (selectedScaleId == chip.id)
                     Button(action: {
-                        selectedScaleId = chip.id
+                        withAnimation(StudioMotion.snappyControl) {
+                            selectedScaleId = chip.id
+                        }
                         onPlayAudition?()
                     }) {
                         Text(chip.label)
@@ -505,14 +522,16 @@ public struct StudioSelectorBar: View {
                                     .strokeBorder(isSelected ? Color.musicianGoldLight.opacity(0.6) : Color.white.opacity(0.08), lineWidth: 0.6)
                             )
                     }
-                    .buttonStyle(.plain)
+                    .studioPressable()
                     .fixedSize(horizontal: true, vertical: false)
                 }
             } else if viewMode == .chords {
                 ForEach(StudioPresets.heroChordChips, id: \.id) { chip in
                     let isSelected = (selectedChordId == chip.id)
                     Button(action: {
-                        selectedChordId = chip.id
+                        withAnimation(StudioMotion.snappyControl) {
+                            selectedChordId = chip.id
+                        }
                         onPlayAudition?()
                     }) {
                         Text(chip.label)
@@ -527,7 +546,7 @@ public struct StudioSelectorBar: View {
                                     .strokeBorder(isSelected ? Color.musicianGoldLight.opacity(0.6) : Color.white.opacity(0.08), lineWidth: 0.6)
                             )
                     }
-                    .buttonStyle(.plain)
+                    .studioPressable()
                     .fixedSize(horizontal: true, vertical: false)
                 }
             }

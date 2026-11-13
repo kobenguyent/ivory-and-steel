@@ -96,8 +96,8 @@ public struct NativeFretboardView: View {
     
     public init(
         highlights: [FretHighlightModel] = [],
-        title: String = "Interactive 6-String Fretboard",
-        subtitle: String = "15-Fret Rosewood Neck · Standard Tuning (EADGBE) · Logarithmic Spacing",
+        title: String = "Guitar Fretboard",
+        subtitle: String = "",
         onPlayFret: ((String, Int) -> Void)? = nil
     ) {
         self.highlights = highlights
@@ -133,74 +133,62 @@ public struct NativeFretboardView: View {
     
     private var headerBar: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 8) {
-                    Image(systemName: "guitars.fill")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color.musicianGold)
-                        .padding(6)
-                        .background(Color.musicianGold.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    
-                    Text(title)
-                        .font(.system(size: 17, weight: .bold, design: .serif))
-                        .foregroundColor(Color.musicianIvory)
-                    
-                    if !highlights.isEmpty {
-                        Text("\(highlights.count) Positions")
-                            .font(.system(size: 9.5, weight: .semibold, design: .monospaced))
-                            .foregroundColor(Color.musicianGoldLight)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.white.opacity(0.06))
-                            .clipShape(Capsule())
-                    }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 11.5, weight: .regular))
+                        .foregroundColor(Color.gray)
                 }
-                
-                Text(subtitle)
-                    .font(.system(size: 11.5, weight: .regular))
-                    .foregroundColor(Color.gray)
             }
             
             Spacer()
             
             // CAGED Selector & Note Display Toggle
             HStack(spacing: 8) {
-                // CAGED Shape Picker Menu
-                Menu {
-                    ForEach(CAGEDForm.allCases) { form in
-                        Button(action: { selectedCAGED = form }) {
-                            HStack {
-                                Text(form.rawValue)
-                                if selectedCAGED == form {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
-                } label: {
+                // CAGED Shape Picker Dropdown (Smooth Glassmorphism Popover)
+                LuxuryDropdown(
+                    selection: $selectedCAGED,
+                    options: CAGEDForm.allCases.map { form in
+                        let fretDesc = form.fretRange.map { "Frets \($0.lowerBound)–\($0.upperBound)" } ?? "Full Neck"
+                        return LuxuryDropdownOption(
+                            value: form,
+                            title: form.rawValue,
+                            badge: fretDesc
+                        )
+                    },
+                    popoverWidth: 215,
+                    maxPopoverHeight: 250,
+                    shape: .rounded(7)
+                ) { isOpen, isHovered in
                     HStack(spacing: 5) {
                         Image(systemName: "square.grid.3x3.fill")
                             .font(.system(size: 9))
                         Text(selectedCAGED.rawValue)
                             .font(.system(size: 10.5, weight: .bold))
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.system(size: 8))
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 8, weight: .bold))
+                            .rotationEffect(.degrees(isOpen ? 180 : 0))
+                            .animation(.spring(response: 0.28, dampingFraction: 0.78), value: isOpen)
                     }
                     .padding(.horizontal, 9)
                     .padding(.vertical, 4.5)
                     .foregroundColor(selectedCAGED != .all ? selectedCAGED.tintColor : Color.musicianIvory)
-                    .background(Color.musicianCharcoal)
+                    .background(isOpen ? Color.white.opacity(0.10) : (isHovered ? Color.white.opacity(0.07) : Color.musicianCharcoal))
                     .clipShape(RoundedRectangle(cornerRadius: 7))
                     .overlay(
                         RoundedRectangle(cornerRadius: 7)
                             .strokeBorder(
-                                selectedCAGED != .all ? selectedCAGED.tintColor.opacity(0.6) : Color.gray.opacity(0.3),
+                                isOpen
+                                    ? Color.musicianGold.opacity(0.65)
+                                    : (selectedCAGED != .all ? selectedCAGED.tintColor.opacity(0.6) : (isHovered ? Color.white.opacity(0.22) : Color.gray.opacity(0.3))),
                                 lineWidth: 1
                             )
                     )
                 }
-                .buttonStyle(.plain)
                 
                 // Note Names Toggle
                 Button(action: { showNoteNames.toggle() }) {
@@ -500,6 +488,8 @@ public struct NativeFretboardView: View {
                 .clipShape(Capsule())
                 .offset(x: minX + 4, y: 24)
         }
+        .animation(StudioMotion.cardGlide, value: selectedCAGED)
+        .transition(.opacity)
     }
     
     // MARK: - Metallic Guitar Strings with Pluck Oscillation
@@ -578,10 +568,10 @@ public struct NativeFretboardView: View {
                                     .frame(width: 16, height: 16)
                                     .overlay(Circle().strokeBorder(Color.white.opacity(0.1), lineWidth: 0.6))
                             } else {
-                                // Transparent hover target
+                                // Transparent hover & hit target
                                 Circle()
-                                    .fill(Color.clear)
-                                    .frame(width: 18, height: 18)
+                                    .fill(Color.white.opacity(0.001))
+                                    .frame(width: 22, height: 22)
                             }
                             
                             // Text Label
@@ -616,31 +606,22 @@ public struct NativeFretboardView: View {
                     Circle()
                         .fill(Color.musicianGold)
                         .frame(width: 8, height: 8)
-                    Text("Root Note (1)")
+                    Text("Root Note")
                         .font(.system(size: 10.5, weight: .medium))
                         .foregroundColor(Color.musicianGoldLight)
                 }
-                
+
                 HStack(spacing: 5) {
                     Circle()
                         .fill(Color.subdominantEmerald)
                         .frame(width: 8, height: 8)
-                    Text("Chord Tone / Scale Degree")
+                    Text("Scale / Chord Tone")
                         .font(.system(size: 10.5, weight: .medium))
                         .foregroundColor(Color.gray)
                 }
             }
-            
+
             Spacer()
-            
-            HStack(spacing: 5) {
-                Image(systemName: "waveform.path")
-                    .font(.system(size: 10))
-                    .foregroundColor(Color.musicianGold.opacity(0.8))
-                Text("Plucked Karplus-Strong Physical String Model")
-                    .font(.system(size: 10.5, weight: .medium, design: .monospaced))
-                    .foregroundColor(Color.gray)
-            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)

@@ -41,61 +41,60 @@ public struct MetronomeStudioView: View {
     
     @State private var selectedSignature: TimeSignaturePreset = .fourFour
     @State private var selectedSubdivision: SubdivisionType = .quarter
-    
+
     // Speed Trainer Settings
     @State private var isSpeedTrainerActive: Bool = false
     @State private var speedTrainerStartBPM: Double = 80.0
     @State private var speedTrainerTargetBPM: Double = 140.0
     @State private var speedTrainerIncrement: Double = 4.0
     @State private var speedTrainerBarsInterval: Int = 4
-    @State private var currentBarsElapsed: Int = 0
-    
-    // Tap Tempo Calculation
-    @State private var tapTimes: [Date] = []
-    
+
     public init() {}
-    
+
     public var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                // Top Header Spec & Tap Tempo Strip
-                HStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Sample-Accurate Mechanical & DSP Metronome")
-                            .font(.system(size: 15, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianIvory)
-                        
-                        Text("Zero-jitter audio scheduling with discrete woodblock downbeat impulses")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.gray)
-                    }
-                    
+            VStack(spacing: 20) {
+                // Header & Meter Bar
+                HStack(spacing: 14) {
+                    Text("Metronome")
+                        .font(.system(size: 16, weight: .bold, design: .serif))
+                        .foregroundColor(Color.musicianIvory)
+
                     Spacer()
-                    
-                    // Tap Tempo Button
-                    Button(action: handleTapTempo) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "hand.tap.fill")
-                                .font(.system(size: 12))
-                            Text("Tap Tempo")
-                                .font(.system(size: 12, weight: .bold))
+
+                    LuxuryDropdown(
+                        selection: $selectedSignature,
+                        options: TimeSignaturePreset.allCases.map {
+                            LuxuryDropdownOption(value: $0, title: $0.rawValue)
+                        },
+                        minWidth: 160,
+                        popoverWidth: 210
+                    )
+                    .onChange(of: selectedSignature) { _, newSig in
+                        appState.metronomeTimeSignature = newSig.signature
+                        if appState.isMetronomePlaying {
+                            appState.metronomeEngine?.start(bpm: appState.metronomeBPM, timeSignature: newSig.signature)
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .foregroundColor(Color.musicianEbony)
-                        .background(Color.musicianGold)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
-                    .buttonStyle(.plain)
+
+                    LuxuryDropdown(
+                        selection: $selectedSubdivision,
+                        options: SubdivisionType.allCases.map {
+                            LuxuryDropdownOption(value: $0, title: $0.rawValue)
+                        },
+                        minWidth: 185,
+                        popoverWidth: 230
+                    )
                 }
-                .padding(16)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .background(Color.musicianCard)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
                 )
-                
+
                 // Central Dial & Pendulum Display
                 MetronomeDialView(
                     bpm: Binding(
@@ -110,6 +109,8 @@ public struct MetronomeStudioView: View {
                             }
                         }
                     ),
+                    beatsPerBar: selectedSignature.signature.beats,
+                    beatTick: appState.currentBeatTick,
                     onBpmChanged: { newBpm in
                         appState.setBPM(newBpm)
                     },
@@ -117,17 +118,19 @@ public struct MetronomeStudioView: View {
                         appState.toggleMetronome()
                     }
                 )
-                
-                // Italian Tempo Markings Quick Selector
+
+                // Tempo Markings Strip
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Italian Classical Tempo Markings")
+                    Text("Tempo Markings")
                         .font(.system(size: 13, weight: .bold, design: .serif))
                         .foregroundColor(Color.musicianIvory)
-                    
+
                     HStack(spacing: 10) {
                         ForEach(MetronomePresets.standard) { preset in
                             Button(action: {
-                                appState.setBPM(preset.bpm)
+                                withAnimation(StudioMotion.snappyControl) {
+                                    appState.setBPM(preset.bpm)
+                                }
                             }) {
                                 VStack(spacing: 4) {
                                     Text(preset.name)
@@ -137,7 +140,7 @@ public struct MetronomeStudioView: View {
                                                 ? Color.musicianEbony
                                                 : Color.musicianIvory
                                         )
-                                    
+
                                     Text("\(Int(preset.bpm))")
                                         .font(.system(size: 10, weight: .semibold, design: .monospaced))
                                         .foregroundColor(
@@ -160,76 +163,35 @@ public struct MetronomeStudioView: View {
                                         .strokeBorder(Color.musicianGold.opacity(0.25), lineWidth: 1)
                                 )
                             }
-                            .buttonStyle(.plain)
+                            .studioPressable()
                         }
                     }
+                    .animation(StudioMotion.snappyControl, value: appState.metronomeBPM)
                 }
                 .padding(16)
                 .background(Color.musicianCard)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-                
-                // Meter & Subdivisions
-                HStack(alignment: .top, spacing: 20) {
-                    // Time Signature Picker
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Time Signature (Meter)")
-                            .font(.system(size: 12, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianGold)
-                        
-                        Picker("Signature", selection: $selectedSignature) {
-                            ForEach(TimeSignaturePreset.allCases) { sig in
-                                Text(sig.rawValue).tag(sig)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .onChange(of: selectedSignature) { _, newSig in
-                            appState.metronomeTimeSignature = newSig.signature
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(14)
-                    .background(Color.musicianSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    
-                    // Subdivision Selector
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Rhythmic Subdivision")
-                            .font(.system(size: 12, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianGold)
-                        
-                        Picker("Subdivision", selection: $selectedSubdivision) {
-                            ForEach(SubdivisionType.allCases) { sub in
-                                Text(sub.rawValue).tag(sub)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(14)
-                    .background(Color.musicianSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                
-                // Speed Trainer (Gradual Tempo Acceleration)
+
+                // Speed Trainer
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Toggle(isOn: $isSpeedTrainerActive) {
-                            Label("Speed Trainer (Automated Tempo Acceleration)", systemImage: "speedometer")
+                            Text("Speed Trainer")
                                 .font(.system(size: 13, weight: .bold, design: .serif))
                                 .foregroundColor(Color.musicianIvory)
                         }
                         .toggleStyle(.switch)
                         .tint(Color.musicianGold)
-                        
+
                         Spacer()
-                        
+
                         if isSpeedTrainerActive {
-                            Text("Accelerating: +\(Int(speedTrainerIncrement)) BPM every \(speedTrainerBarsInterval) bars")
+                            Text("+\(Int(speedTrainerIncrement)) BPM every \(speedTrainerBarsInterval) bars")
                                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                                 .foregroundColor(Color.musicianGold)
                         }
                     }
-                    
+
                     if isSpeedTrainerActive {
                         HStack(spacing: 20) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -238,18 +200,37 @@ public struct MetronomeStudioView: View {
                                     .foregroundColor(Color.gray)
                                 Slider(value: $speedTrainerStartBPM, in: 40...160, step: 5)
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Target BPM: \(Int(speedTrainerTargetBPM))")
                                     .font(.system(size: 11))
                                     .foregroundColor(Color.gray)
                                 Slider(value: $speedTrainerTargetBPM, in: 80...240, step: 5)
                             }
-                            
-                            Button("Set Start BPM") {
-                                appState.setBPM(speedTrainerStartBPM)
+
+                            Button(action: {
+                                withAnimation(StudioMotion.snappyControl) {
+                                    appState.setBPM(speedTrainerStartBPM)
+                                }
+                            }) {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "arrow.counterclockwise")
+                                        .font(.system(size: 10, weight: .bold))
+                                    Text("Set Start BPM")
+                                        .font(.system(size: 11, weight: .semibold))
+                                }
+                                .foregroundColor(Color.musicianGoldLight)
+                                .padding(.horizontal, 11)
+                                .padding(.vertical, 6)
+                                .background(Color.musicianGold.opacity(0.14))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .strokeBorder(Color.musicianGold.opacity(0.32), lineWidth: 0.8)
+                                )
                             }
-                            .buttonStyle(.bordered)
+                            .studioPressable()
+                            .transition(.studioSection)
                         }
                     }
                 }
@@ -260,31 +241,11 @@ public struct MetronomeStudioView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
                 )
+                .animation(StudioMotion.cardGlide, value: isSpeedTrainerActive)
             }
             .padding(20)
         }
         .background(Color.musicianEbony)
-    }
-    
-    private func handleTapTempo() {
-        let now = Date()
-        tapTimes.append(now)
-        
-        // Keep only taps within last 3 seconds
-        tapTimes = tapTimes.filter { now.timeIntervalSince($0) < 3.0 }
-        
-        guard tapTimes.count >= 2 else { return }
-        
-        var intervals: [Double] = []
-        for i in 1..<tapTimes.count {
-            intervals.append(tapTimes[i].timeIntervalSince(tapTimes[i-1]))
-        }
-        
-        let avgInterval = intervals.reduce(0.0, +) / Double(intervals.count)
-        guard avgInterval > 0.15 else { return } // sanity floor 400 bpm
-        
-        let calculatedBpm = 60.0 / avgInterval
-        appState.setBPM(round(calculatedBpm))
     }
 }
 

@@ -28,34 +28,55 @@ public struct GuitarFretboardStudioView: View {
     
     @State private var selectedTuning: GuitarTuning = .standard
     @State private var selectedCAGED: CAGEDForm = .all
-    @State private var guideRoot: String = "C"
-    @State private var guideScale: String = "minor_pentatonic"
-    @State private var isScaleGuideActive: Bool = true
-    
+    @State private var showGuideSheet: Bool = false
+
     private let theory = MusicTheoryEngine.shared
-    
+
     public init() {}
-    
+
+    private var guideRootBinding: Binding<String> {
+        Binding(
+            get: { appState.rootKey },
+            set: { appState.setRootKey($0) }
+        )
+    }
+
+    private var guideScaleBinding: Binding<String> {
+        Binding(
+            get: { appState.guitarGuideScaleId },
+            set: { appState.guitarGuideScaleId = $0 }
+        )
+    }
+
     private var activeHighlights: [FretHighlightModel] {
-        guard isScaleGuideActive else { return [] }
-        let scaleNotes = theory.notes(forScale: guideScale, rootKey: guideRoot)
+        let targetPitchNotes: [String]
+        if appState.guitarGuideEnabled {
+            targetPitchNotes = theory.notes(forScale: appState.guitarGuideScaleId, rootKey: appState.rootKey)
+        } else if !appState.activeVoicingNotes.isEmpty {
+            targetPitchNotes = appState.activeVoicingNotes
+        } else {
+            return []
+        }
+
+        let scaleNotes = targetPitchNotes.map {
+            $0.replacingOccurrences(of: "[0-9-]", with: "", options: .regularExpression).uppercased()
+        }
         let openNotes = selectedTuning.openMidiNotes
         var highlights: [FretHighlightModel] = []
-        
+
         for (idx, openMidi) in openNotes.enumerated() {
             let stringNum = 6 - idx // 6 = Low, 1 = High
             for fret in 0...15 {
-                // If CAGED form is selected and fret is outside range, filter it
                 if let range = selectedCAGED.fretRange, !range.contains(fret), fret != 0 {
                     continue
                 }
-                
+
                 let midi = openMidi + fret
                 let pc = midi % 12
                 let noteName = KeyDefinitions.formatPitchName(pitchClass: pc, preferFlat: appState.preferFlat)
-                
+
                 if scaleNotes.contains(where: { KeyDefinitions.rootPitchMap[$0.uppercased()] == pc }) {
-                    let isRoot = (KeyDefinitions.rootPitchMap[guideRoot.uppercased()] == pc)
+                    let isRoot = (KeyDefinitions.rootPitchMap[appState.rootKey.uppercased()] == pc)
                     highlights.append(
                         FretHighlightModel(
                             stringNum: stringNum,
@@ -69,57 +90,74 @@ public struct GuitarFretboardStudioView: View {
         }
         return highlights
     }
-    
+
     public var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 // Master Fretboard Control Header
                 HStack(spacing: 16) {
-                    // Tuning Selector
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Tuning System:")
-                            .font(.system(size: 11, weight: .bold))
+                        Text("Tuning")
+                            .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(Color.gray)
-                        
-                        Picker("Tuning", selection: $selectedTuning) {
-                            ForEach(GuitarTuning.allCases) { tuning in
-                                Text(tuning.rawValue).tag(tuning)
-                            }
-                        }
-                        .frame(width: 220)
+
+                        LuxuryDropdown(
+                            selection: $selectedTuning,
+                            options: GuitarTuning.allCases.map {
+                                LuxuryDropdownOption(value: $0, title: $0.rawValue)
+                            },
+                            minWidth: 210,
+                            popoverWidth: 250
+                        )
                     }
-                    
-                    // CAGED Shape Selector
+
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("CAGED Box System:")
-                            .font(.system(size: 11, weight: .bold))
+                        Text("CAGED Position")
+                            .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(Color.gray)
-                        
-                        Picker("CAGED", selection: $selectedCAGED) {
-                            ForEach(CAGEDForm.allCases) { form in
-                                Text(form.rawValue).tag(form)
-                            }
-                        }
-                        .frame(width: 160)
+
+                        LuxuryDropdown(
+                            selection: $selectedCAGED,
+                            options: CAGEDForm.allCases.map {
+                                LuxuryDropdownOption(value: $0, title: $0.rawValue)
+                            },
+                            minWidth: 160,
+                            popoverWidth: 200
+                        )
                     }
-                    
+
                     Spacer()
-                    
-                    // Strum Open Strings Button
+
+                    Button(action: { showGuideSheet = true }) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 11))
+                            Text("CAGED Guide")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 11)
+                        .frame(height: 30)
+                        .foregroundColor(Color.musicianIvory.opacity(0.85))
+                        .background(Color.musicianSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: 7))
+                        .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Color.white.opacity(0.10), lineWidth: 0.8))
+                    }
+                    .studioPressable()
+
                     Button(action: strumOpenStrings) {
                         HStack(spacing: 6) {
                             Image(systemName: "guitars.fill")
                                 .font(.system(size: 11))
-                            Text("Strum Open Strings")
+                            Text("Strum Open")
                                 .font(.system(size: 11, weight: .semibold))
                         }
-                        .padding(.horizontal, 11)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 12)
+                        .frame(height: 30)
                         .foregroundColor(Color.musicianEbony)
                         .background(Color.musicianGold)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .clipShape(RoundedRectangle(cornerRadius: 7))
                     }
-                    .buttonStyle(.plain)
+                    .studioPressable()
                 }
                 .padding(14)
                 .background(Color.musicianCard)
@@ -128,99 +166,122 @@ public struct GuitarFretboardStudioView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
                 )
-                
-                // 12-Key Fretboard Scale Guide Bar
+
+                // Scale Guide Bar
                 HStack(spacing: 12) {
-                    Toggle(isOn: $isScaleGuideActive) {
-                        Label("Fretboard Scale Boxes", systemImage: "circle.grid.3x3.fill")
+                    Toggle(isOn: Binding(
+                        get: { appState.guitarGuideEnabled },
+                        set: { appState.guitarGuideEnabled = $0 }
+                    )) {
+                        Text("Scale Guide")
                             .font(.system(size: 12, weight: .bold, design: .serif))
                             .foregroundColor(Color.musicianIvory)
                     }
                     .toggleStyle(.switch)
                     .tint(Color.musicianGold)
-                    
-                    if isScaleGuideActive {
-                        Picker("Key", selection: $guideRoot) {
-                            ForEach(KeyDefinitions.chromaticRoots, id: \.self) { root in
-                                Text("Key of \(root)").tag(root)
-                            }
+
+                    if appState.guitarGuideEnabled {
+                        HStack(spacing: 10) {
+                            LuxuryDropdown(
+                                selection: guideRootBinding,
+                                options: KeyDefinitions.chromaticRoots.map {
+                                    LuxuryDropdownOption(value: $0, title: "Key of \($0)")
+                                },
+                                minWidth: 125,
+                                popoverWidth: 185
+                            )
+
+                            LuxuryDropdown(
+                                selection: guideScaleBinding,
+                                options: ScaleDefinitions.allScales.map {
+                                    LuxuryDropdownOption(value: $0.id, title: $0.name)
+                                },
+                                minWidth: 190,
+                                popoverWidth: 250
+                            )
                         }
-                        .frame(width: 140)
-                        
-                        Picker("Scale", selection: $guideScale) {
-                            ForEach(ScaleDefinitions.allScales) { scale in
-                                Text(scale.name).tag(scale.id)
-                            }
+                        .transition(.studioPill)
+                    } else if !appState.activeVoicingNotes.isEmpty {
+                        Text("Voicing: \(appState.activeVoicingNotes.joined(separator: " · "))")
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundColor(Color.musicianGoldLight)
+
+                        Button(action: { appState.activeVoicingNotes = [] }) {
+                            Text("Clear")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(Color.gray)
                         }
-                        .frame(width: 200)
+                        .buttonStyle(.plain)
                     }
-                    
+
                     Spacer()
-                    
-                    Text("\(activeHighlights.count) Active Fret Positions")
-                        .font(.system(size: 9.5, weight: .semibold, design: .monospaced))
-                        .foregroundColor(Color.musicianGoldLight)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(Color.white.opacity(0.06))
-                        .clipShape(Capsule())
                 }
                 .padding(12)
                 .background(Color.musicianSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                
+                .animation(StudioMotion.cardGlide, value: appState.guitarGuideEnabled)
+
                 // 15-Fret Interactive Neck
                 NativeFretboardView(
                     highlights: activeHighlights,
-                    title: "Boutique Luthier 6-String Rosewood Neck",
-                    subtitle: "\(selectedTuning.rawValue) · \(selectedCAGED.rawValue) · 15 Frets with Logarithmic Spacing",
-                    onPlayFret: { noteName, midi in
+                    title: "6-String Fretboard",
+                    subtitle: "\(selectedTuning.rawValue) · \(selectedCAGED.rawValue)",
+                    onPlayFret: { _, midi in
                         appState.playGuitar(midi: midi, velocity: 0.88, duration: 2.2)
                     }
                 )
-                
-                // Fretboard Landmarks & Acoustic Guidance
-                HStack(alignment: .top, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Pearloid Inlay Landmarks")
-                            .font(.system(size: 12, weight: .bold, design: .serif))
-                            .foregroundColor(Color.subdominantEmerald)
-                        
-                        Text("• Single mother-of-pearl dots at frets 3, 5, 7, 9, and 15.")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.gray)
-                        
-                        Text("• Double dot at fret 12 marks the exact physical octave center where open string frequency doubles (2x).")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.gray)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(14)
-                    .background(Color.musicianCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("The CAGED Harmonization Framework")
-                            .font(.system(size: 12, weight: .bold, design: .serif))
-                            .foregroundColor(Color.subdominantEmerald)
-                        
-                        Text("• Connects 5 primary open chord forms across the entire neck.")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.gray)
-                        
-                        Text("• Anchor root notes on String 6 (E-shape, G-shape) and String 5 (A-shape, C-shape) to navigate movable barres.")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.gray)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(14)
-                    .background(Color.musicianCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
             }
             .padding(20)
         }
         .background(Color.musicianEbony)
+        .sheet(isPresented: $showGuideSheet) {
+            fretboardGuideSheetContent
+        }
+    }
+
+    private var fretboardGuideSheetContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Fretboard & CAGED Guide")
+                    .font(.system(size: 16, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+                Spacer()
+                Button(action: { showGuideSheet = false }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color.musicianIvory.opacity(0.75))
+                        .frame(width: 26, height: 26)
+                        .background(Color.white.opacity(0.06))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
+            }
+
+            Divider().background(Color.hairlineDivider)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Fret Inlay Markers")
+                    .font(.system(size: 12.5, weight: .bold, design: .serif))
+                    .foregroundColor(Color.subdominantEmerald)
+                Text("Single markers indicate frets 3, 5, 7, 9, and 15. The double marker at fret 12 is one octave above the open strings.")
+                    .font(.system(size: 11.5))
+                    .foregroundColor(Color.gray)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("The CAGED System")
+                    .font(.system(size: 12.5, weight: .bold, design: .serif))
+                    .foregroundColor(Color.subdominantEmerald)
+                Text("Connects five movable neck regions (C, A, G, E, D) across all 15 frets. Anchor roots on string 6 (E/G shapes) and string 5 (A/C shapes).")
+                    .font(.system(size: 11.5))
+                    .foregroundColor(Color.gray)
+            }
+        }
+        .padding(22)
+        .frame(width: 460)
+        .background(Color.musicianEbony)
+        .preferredColorScheme(.dark)
     }
     
     private func strumOpenStrings() {

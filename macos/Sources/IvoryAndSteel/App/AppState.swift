@@ -9,6 +9,13 @@ public final class AppState: @unchecked Sendable {
     
     // MARK: - Navigation & Active Views
     public var selectedTab: AppTab = .theoryExplorer
+    public var masterclassSelectedTipId: String? = nil
+
+    // MARK: - Instrument Studio Guide Sync
+    public var pianoGuideEnabled: Bool = false
+    public var pianoGuideScaleId: String = "major"
+    public var guitarGuideEnabled: Bool = true
+    public var guitarGuideScaleId: String = "minor_pentatonic"
     
     // MARK: - Music Theory & Selection State
     public var rootKey: String = "C" {
@@ -28,6 +35,7 @@ public final class AppState: @unchecked Sendable {
     public var activeVoicingNotes: [String] = []
     public var isMuted: Bool = false
     public var connectedMIDIDevices: [String] = []
+    private var chordPlaybackGeneration: Int = 0
     
     // MARK: - Metronome State
     public var metronomeBPM: Double = 120.0 {
@@ -82,6 +90,81 @@ public final class AppState: @unchecked Sendable {
         let tabs = AppTab.allCases
         guard index >= 0 && index < tabs.count else { return }
         self.selectedTab = tabs[index]
+    }
+
+    // MARK: - Cross-Page Handoffs
+
+    public func openInPianoStudio(
+        root: String? = nil,
+        scaleId: String? = nil,
+        voicingNotes: [String]? = nil
+    ) {
+        if let root { setRootKey(root) }
+        self.activeInstrument = "piano"
+        if let voicingNotes, !voicingNotes.isEmpty {
+            self.activeVoicingNotes = voicingNotes
+            self.pianoGuideEnabled = false
+        } else if let scaleId {
+            self.selectedScaleId = scaleId
+            self.pianoGuideScaleId = scaleId
+            self.pianoGuideEnabled = true
+        }
+        selectTab(.virtualPiano)
+    }
+
+    public func openInGuitarStudio(
+        root: String? = nil,
+        scaleId: String? = nil,
+        voicingNotes: [String]? = nil
+    ) {
+        if let root { setRootKey(root) }
+        self.activeInstrument = "guitar"
+        if let scaleId {
+            self.selectedScaleId = scaleId
+            self.guitarGuideScaleId = scaleId
+            self.guitarGuideEnabled = true
+        } else if let voicingNotes, !voicingNotes.isEmpty {
+            self.activeVoicingNotes = voicingNotes
+            self.guitarGuideEnabled = false
+        }
+        selectTab(.guitarFretboard)
+    }
+
+    public func openMetronome(atBPM bpm: Double? = nil) {
+        if let bpm { setBPM(bpm) }
+        selectTab(.metronome)
+    }
+
+    public func openMasterclassTopic(id: String) {
+        self.masterclassSelectedTipId = id
+        selectTab(.masterclassHub)
+    }
+
+    public func addTaskToPracticeRoutine(
+        title: String,
+        details: String = "",
+        estimatedMinutes: Int? = 5,
+        targetBPM: Double? = nil,
+        navigate: Bool = true,
+        storage: StorageManager = .shared
+    ) {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        var tasks = storage.practiceTasks
+        if !tasks.contains(where: { $0.title.caseInsensitiveCompare(trimmed) == .orderedSame }) {
+            let task = PracticeChecklistTask(
+                title: trimmed,
+                details: details,
+                estimatedMinutes: estimatedMinutes,
+                targetBPM: targetBPM,
+                isCompleted: false
+            )
+            tasks.append(task)
+            storage.savePracticeTasks(tasks)
+        }
+        if navigate {
+            selectTab(.practiceRoutine)
+        }
     }
     
     // MARK: - Theory Selection Actions
@@ -162,20 +245,86 @@ public final class AppState: @unchecked Sendable {
         }
     }
     
-    public func playChordVoicing(notes: [String], isGuitar: Bool = false) {
+    public func playChordVoicing(notes: [String], isGuitar: Bool = false, stepDelay: Double? = nil) {
         guard !isMuted else { return }
         self.activeVoicingNotes = notes
+        self.chordPlaybackGeneration &+= 1
+        let generation = self.chordPlaybackGeneration
         
+        let resolvedDelay = stepDelay ?? (isGuitar ? 0.035 : 0.022) // natural guitar strum vs pianist rolled chord
         for (index, note) in notes.enumerated() {
             let midi = MusicTheoryEngine.shared.midiNote(for: note)
-            let delay = Double(index) * 0.04 // micro-strum feel
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            let delay = Double(index) * resolvedDelay
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self = self, self.chordPlaybackGeneration == generation else { return }
                 if isGuitar {
                     self.playGuitar(midi: midi, velocity: 0.82, duration: 2.2)
                 } else {
                     self.playPiano(midi: midi, velocity: 0.80, duration: 1.8)
                 }
             }
+        }
+    }
+
+    /// Stops any in-flight scheduled chord/scale/cadence playback immediately.
+    public func stopQuizPlayback() {
+        self.chordPlaybackGeneration &+= 1
+        self.activeVoicingNotes = []
+    }
+
+    /// Plays a multi-modal conservatory `QuizAudioCue` (melodic intervals, harmonic/arpeggiated chords, scales, or chord progressions).
+    /// Supports overriding articulation style (e.g. toggling Harmonic vs Arpeggio inside the Audio Audition Deck).
+    public func playQuizCue(_ cue: QuizAudioCue, overrideStyle: AudioPlaybackStyle? = nil) {
+        guard !isMuted else { return }
+        self.chordPlaybackGeneration &+= 1
+        let generation = self.chordPlaybackGeneration
+        let effectiveStyle = overrideStyle ?? cue.style
+
+        switch effectiveStyle {
+        case .chordProgression:
+            let sequence = cue.progressions ?? (cue.notes.isEmpty ? [] : [cue.notes])
+            let step = max(0.35, cue.stepDuration)
+            for (chordIdx, chordNotes) in sequence.enumerated() {
+                let chordDelay = Double(chordIdx) * step
+                DispatchQueue.main.asyncAfter(deadline: .now() + chordDelay) { [weak self] in
+                    guard let self = self, self.chordPlaybackGeneration == generation else { return }
+                    self.activeVoicingNotes = chordNotes
+                    for (noteIdx, note) in chordNotes.enumerated() {
+                        let midi = MusicTheoryEngine.shared.midiNote(for: note)
+                        let microRoll = Double(noteIdx) * (cue.isGuitar ? 0.025 : 0.015)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + microRoll) { [weak self] in
+                            guard let self = self, self.chordPlaybackGeneration == generation else { return }
+                            if cue.isGuitar {
+                                self.playGuitar(midi: midi, velocity: 0.80, duration: step * 1.15)
+                            } else {
+                                self.playPiano(midi: midi, velocity: 0.78, duration: step * 1.15)
+                            }
+                        }
+                    }
+                }
+            }
+
+        case .melodic, .scale:
+            self.activeVoicingNotes = cue.notes
+            let step = max(0.18, cue.stepDuration)
+            for (idx, note) in cue.notes.enumerated() {
+                let midi = MusicTheoryEngine.shared.midiNote(for: note)
+                let delay = Double(idx) * step
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                    guard let self = self, self.chordPlaybackGeneration == generation else { return }
+                    if cue.isGuitar {
+                        self.playGuitar(midi: midi, velocity: 0.84, duration: 1.4)
+                    } else {
+                        self.playPiano(midi: midi, velocity: 0.82, duration: 1.2)
+                    }
+                }
+            }
+
+        case .arpeggiated:
+            playChordVoicing(notes: cue.notes, isGuitar: cue.isGuitar, stepDelay: max(0.28, cue.stepDuration))
+
+        case .harmonic:
+            playChordVoicing(notes: cue.notes, isGuitar: cue.isGuitar, stepDelay: cue.isGuitar ? 0.028 : 0.016)
         }
     }
     
