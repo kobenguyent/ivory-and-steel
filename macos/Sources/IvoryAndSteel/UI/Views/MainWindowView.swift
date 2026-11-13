@@ -69,6 +69,15 @@ public struct MainWindowView: View {
             .frame(minWidth: 700, minHeight: 550)
             .background(Color.musicianEbony)
         }
+        .sheet(
+            isPresented: Binding(
+                get: { appState.showingUpdateSheet },
+                set: { appState.showingUpdateSheet = $0 }
+            )
+        ) {
+            UpdateSheetView()
+                .environment(appState)
+        }
     }
     
     // MARK: - Apple Glassmorphism Sidebar
@@ -198,6 +207,8 @@ public struct MainWindowView: View {
             }
             
             Spacer(minLength: 16)
+            
+            sidebarUpdateFooter
         }
         .background {
             ZStack {
@@ -206,6 +217,82 @@ public struct MainWindowView: View {
                 
                 // Deep luxury tinted translucent wash (zero opaque solid colors)
                 Color(hex: 0x0E0F15, opacity: 0.78)
+            }
+        }
+    }
+    
+    // MARK: - Sidebar Update Footer
+    
+    private var sidebarUpdateFooter: some View {
+        VStack(spacing: 8) {
+            Rectangle()
+                .fill(Color.white.opacity(0.07))
+                .frame(height: 1)
+                .padding(.horizontal, 12)
+            
+            if case .updateAvailable(let release, _) = appState.updateStatus {
+                Button(action: {
+                    appState.showingUpdateSheet = true
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Color.musicianEbony)
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Update Available")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(Color.musicianEbony)
+                            Text("Download \(release.tagName)")
+                                .font(.system(size: 9.5, weight: .medium, design: .monospaced))
+                                .foregroundColor(Color.musicianEbony.opacity(0.8))
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(Color.musicianEbony)
+                    }
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 7)
+                    .background(Color.musicianGold)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 12)
+            } else {
+                Button(action: {
+                    appState.checkForUpdates(userInitiated: true)
+                }) {
+                    HStack(spacing: 6) {
+                        if appState.updateStatus.isChecking {
+                            ProgressView()
+                                .controlSize(.mini)
+                                .scaleEffect(0.7)
+                        } else {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(Color.white.opacity(0.45))
+                        }
+                        
+                        Text("v\(appState.currentAppVersion)")
+                            .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                            .foregroundColor(Color.white.opacity(0.55))
+                        
+                        Spacer()
+                        
+                        Text(appState.updateStatus.isChecking ? "Checking…" : "Check Updates")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(Color.musicianGold.opacity(0.85))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 6)
+                .padding(.bottom, 10)
             }
         }
     }

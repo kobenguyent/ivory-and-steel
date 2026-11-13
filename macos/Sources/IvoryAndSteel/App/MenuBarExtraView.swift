@@ -154,6 +154,28 @@ public struct MenuBarExtraView: View {
                 .buttonStyle(.plain)
                 .foregroundColor(appState.isMuted ? Color.steinwayCrimson : Color.musicianIvory)
                 
+                Button(action: {
+                    NSApp.activate(ignoringOtherApps: true)
+                    if let window = NSApp.windows.first(where: { $0.canBecomeMain }) {
+                        window.makeKeyAndOrderFront(nil)
+                    }
+                    appState.checkForUpdates(userInitiated: true)
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.down.circle")
+                        if let release = appState.updateStatus.availableRelease {
+                            Text("Update Available (\(release.tagName))")
+                        } else {
+                            Text("Check for Updates…")
+                        }
+                        Spacer()
+                        Text("v\(appState.currentAppVersion)").font(.system(size: 9, design: .monospaced)).foregroundColor(.gray)
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(appState.updateStatus.availableRelease != nil ? Color.musicianGold : Color.musicianIvory)
+                
                 Divider()
                     .background(Color.musicianGold.opacity(0.2))
                 

@@ -176,21 +176,7 @@ public struct MasterclassHubView: View {
     }
     
     private func loadTips() {
-        // Try Bundle.module resource or bundle path
-        if let url = Bundle.module.url(forResource: "TipsData", withExtension: "json") ??
-                     Bundle.main.url(forResource: "TipsData", withExtension: "json") {
-            if let data = try? Data(contentsOf: url),
-               let decoded = try? JSONDecoder().decode([MasterclassTipModel].self, from: data) {
-                self.allTips = decoded
-                return
-            }
-        }
-        
-        // Fallback: direct relative read from project Resources
-        let currentDir = FileManager.default.currentDirectoryPath
-        let fallbackUrl = URL(fileURLWithPath: "\(currentDir)/Resources/TipsData.json")
-        if let data = try? Data(contentsOf: fallbackUrl),
-           let decoded = try? JSONDecoder().decode([MasterclassTipModel].self, from: data) {
+        if let decoded = ResourceLoader.decodeJSON([MasterclassTipModel].self, resource: "TipsData") {
             self.allTips = decoded
         }
     }

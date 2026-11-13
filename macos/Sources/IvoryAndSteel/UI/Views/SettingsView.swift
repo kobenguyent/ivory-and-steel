@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// Settings Studio View:
 /// Audio buffer size, CoreMIDI device selector, synthesis models,
@@ -219,12 +220,140 @@ public struct SettingsView: View {
                 .padding(16)
                 .background(Color.musicianCard)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+                
+                softwareUpdateSection
             }
             .padding(20)
         }
         .background(Color.musicianEbony)
         .alert(resetMessage, isPresented: $showResetAlert) {
             Button("OK", role: .cancel) {}
+        }
+    }
+    
+    // MARK: - Section 5: Software Updates & GitHub Releases
+    
+    private var softwareUpdateSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Image(systemName: "arrow.down.circle.dotted")
+                    .foregroundColor(Color.musicianGold)
+                Text("Software Updates & GitHub Releases")
+                    .font(.system(size: 13, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+                
+                Spacer()
+                
+                Text("v\(appState.currentAppVersion)")
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.musicianSurface)
+                    .foregroundColor(Color.musicianGold)
+                    .clipShape(Capsule())
+            }
+            
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Update Status:")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color.gray)
+                    
+                    Spacer()
+                    
+                    Text(updateStatusSummary)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(updateStatusColor)
+                }
+                
+                if let lastCheck = appState.lastUpdateCheckDate {
+                    HStack {
+                        Text("Last Checked:")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color.gray)
+                        
+                        Spacer()
+                        
+                        Text(lastCheck.formatted(date: .abbreviated, time: .shortened))
+                            .font(.system(size: 11.5, design: .monospaced))
+                            .foregroundColor(Color.musicianIvory.opacity(0.8))
+                    }
+                }
+                
+                Toggle(
+                    "Automatically check for updates on launch",
+                    isOn: Binding(
+                        get: { appState.autoCheckForUpdates },
+                        set: { appState.setAutoCheckForUpdates($0) }
+                    )
+                )
+                .font(.system(size: 12))
+                .foregroundColor(Color.musicianIvory)
+                .toggleStyle(.switch)
+                
+                Toggle(
+                    "Include pre-release / beta builds",
+                    isOn: Binding(
+                        get: { appState.includePrereleases },
+                        set: { appState.setIncludePrereleases($0) }
+                    )
+                )
+                .font(.system(size: 12))
+                .foregroundColor(Color.musicianIvory)
+                .toggleStyle(.switch)
+                
+                HStack(spacing: 12) {
+                    Button(action: {
+                        appState.checkForUpdates(userInitiated: true)
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                            Text(appState.updateStatus.isChecking ? "Checking…" : "Check for Updates Now")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.musicianGold)
+                    .foregroundColor(Color.musicianEbony)
+                    .disabled(appState.updateStatus.isChecking)
+                    
+                    Button("View GitHub Releases") {
+                        NSWorkspace.shared.open(appState.updateChecker.releasesWebURL)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(16)
+        .background(Color.musicianCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+    
+    private var updateStatusSummary: String {
+        switch appState.updateStatus {
+        case .idle:
+            return "Ready to check"
+        case .checking:
+            return "Checking GitHub Releases…"
+        case .upToDate(let ver, _):
+            return "Up to date (v\(ver))"
+        case .updateAvailable(let release, _):
+            return "Update available: \(release.tagName)"
+        case .error(let msg):
+            return msg
+        }
+    }
+    
+    private var updateStatusColor: Color {
+        switch appState.updateStatus {
+        case .idle, .checking:
+            return Color.musicianIvory
+        case .upToDate:
+            return Color.subdominantEmerald
+        case .updateAvailable:
+            return Color.musicianGold
+        case .error:
+            return Color.steinwayCrimson
         }
     }
 }

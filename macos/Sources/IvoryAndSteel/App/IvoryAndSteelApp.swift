@@ -40,10 +40,21 @@ struct IvoryAndSteelApp: App {
                 .environment(appState)
                 .frame(minWidth: 1080, minHeight: 720)
                 .background(Color.musicianEbony)
+                .task {
+                    if appState.autoCheckForUpdates {
+                        await appState.performUpdateCheck(userInitiated: false)
+                    }
+                }
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
         .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") {
+                    appState.checkForUpdates(userInitiated: true)
+                }
+            }
+            
             // Studio Menu: Tab switching keyboard shortcuts ⌘1 - ⌘7
             CommandMenu("Studio") {
                 Button("Theory Explorer") {

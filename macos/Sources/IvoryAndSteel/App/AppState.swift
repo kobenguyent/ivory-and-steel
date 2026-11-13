@@ -40,17 +40,35 @@ public final class AppState: @unchecked Sendable {
     public var currentBeatTick: Int = 0
     public var isDownbeatTick: Bool = false
     
+    // MARK: - Software Update State (GitHub Releases)
+    public var updateStatus: UpdateStatus = .idle
+    public var showingUpdateSheet: Bool = false
+    public var autoCheckForUpdates: Bool = true
+    public var includePrereleases: Bool = false
+    public var lastUpdateCheckDate: Date? = nil
+    
     // MARK: - Injected Services (Optional / Protocol Conformances)
     public var audioEngine: AudioEngineProtocol?
     public var metronomeEngine: MetronomeProtocol?
+    public var updateChecker: UpdateCheckerProtocol
+    
+    public var currentAppVersion: String {
+        updateChecker.currentVersion
+    }
     
     // MARK: - Initialization
     public init(
         audioEngine: AudioEngineProtocol? = nil,
-        metronomeEngine: MetronomeProtocol? = nil
+        metronomeEngine: MetronomeProtocol? = nil,
+        updateChecker: UpdateCheckerProtocol = UpdateChecker.shared
     ) {
         self.audioEngine = audioEngine
         self.metronomeEngine = metronomeEngine
+        self.updateChecker = updateChecker
+        let savedSettings = StorageManager.shared.settings
+        self.autoCheckForUpdates = savedSettings.autoCheckForUpdates
+        self.includePrereleases = savedSettings.includePrereleases
+        self.lastUpdateCheckDate = savedSettings.lastUpdateCheckDate
         self.updatePreferFlat()
     }
     
@@ -174,6 +192,70 @@ public final class AppState: @unchecked Sendable {
     public func handleMIDINoteOff(midi: Int) {
         DispatchQueue.main.async {
             self.activeMidiNotes.remove(midi)
+        }
+    }
+    
+    // MARK: - GitHub Releases Auto-Update Check
+    
+    /// Triggers an asynchronous GitHub Releases update check.
+    /// - Parameter userInitiated: When `true`, opens the Update dialog immediately and ignores skipped release tags.
+    public func checkForUpdates(userInitiated: Bool = false) {
+        Task { @MainActor in
+            await performUpdateCheck(userInitiated: userInitiated)
+        }
+    }
+    
+    /// Performs the update check and updates observable properties on the MainActor.
+    @MainActor
+    public func performUpdateCheck(userInitiated: Bool = false) async {
+        guard !updateStatus.isChecking else {
+            if userInitiated {
+                showingUpdateSheet = true
+            }
+            return
+        }
+        
+        updateStatus = .checking
+        if userInitiated {
+            showingUpdateSheet = true
+        }
+        
+        let status = await updateChecker.checkForUpdates(includePrereleases: includePrereleases)
+        let now = Date()
+        updateStatus = status
+        lastUpdateCheckDate = now
+        
+        StorageManager.shared.updateSettings { settings in
+            settings.lastUpdateCheckDate = now
+        }
+        
+        if case .updateAvailable(let release, _) = status {
+            let skippedTag = StorageManager.shared.settings.skippedReleaseTag
+            if userInitiated || skippedTag != release.tagName {
+                showingUpdateSheet = true
+            }
+        }
+    }
+    
+    /// Marks a specific release tag as skipped for automatic background prompts.
+    public func skipRelease(tag: String) {
+        StorageManager.shared.updateSettings { settings in
+            settings.skippedReleaseTag = tag
+        }
+        showingUpdateSheet = false
+    }
+    
+    public func setAutoCheckForUpdates(_ enabled: Bool) {
+        autoCheckForUpdates = enabled
+        StorageManager.shared.updateSettings { settings in
+            settings.autoCheckForUpdates = enabled
+        }
+    }
+    
+    public func setIncludePrereleases(_ enabled: Bool) {
+        includePrereleases = enabled
+        StorageManager.shared.updateSettings { settings in
+            settings.includePrereleases = enabled
         }
     }
 }

@@ -166,9 +166,16 @@ if [ -f "${MACOS_DIR}/Resources/AppIcon.png" ]; then
     cp "${MACOS_DIR}/Resources/AppIcon.png" "${RESOURCES_DIR}/AppIcon.png"
 fi
 
-# Copy SPM resource bundle if present
+# Copy bundled JSON resources directly into Contents/Resources so Bundle.main.url always finds them
+if [ -d "${MACOS_DIR}/Sources/IvoryAndSteel/Resources" ]; then
+    cp "${MACOS_DIR}/Sources/IvoryAndSteel/Resources/"*.json "${RESOURCES_DIR}/"
+fi
+
+# Copy SPM resource bundle if present (without signing issues)
 if [ -d "${BIN_DIR}/${APP_NAME}_${APP_NAME}.bundle" ]; then
     cp -R "${BIN_DIR}/${APP_NAME}_${APP_NAME}.bundle" "${RESOURCES_DIR}/"
+elif [ -d "${MACOS_DIR}/.build/arm64-apple-macosx/${BUILD_CONFIG}/${APP_NAME}_${APP_NAME}.bundle" ]; then
+    cp -R "${MACOS_DIR}/.build/arm64-apple-macosx/${BUILD_CONFIG}/${APP_NAME}_${APP_NAME}.bundle" "${RESOURCES_DIR}/"
 fi
 
 echo "APPL????" > "${CONTENTS_DIR}/PkgInfo"

@@ -275,25 +275,12 @@ final class MusicTheoryEngineTests: XCTestCase {
     // MARK: - Bundled Resources (TipsData.json & QuizData.json)
 
     func testBundledResourcesValidity() throws {
-        // Locate TipsData.json and QuizData.json in bundle resources or source resources
-        let bundle = Bundle.module
-        var tipsURL = bundle.url(forResource: "TipsData", withExtension: "json")
-        var quizURL = bundle.url(forResource: "QuizData", withExtension: "json")
-
-        if tipsURL == nil || quizURL == nil {
-            // Fallback for direct testing when bundle resource search path differs
-            let currentFileURL = URL(fileURLWithPath: #filePath)
-            let projectRoot = currentFileURL
-                .deletingLastPathComponent() // IvoryAndSteelTests
-                .deletingLastPathComponent() // Tests
-                .deletingLastPathComponent() // macos
-            let resourcesDir = projectRoot.appendingPathComponent("Sources/IvoryAndSteel/Resources")
-            tipsURL = resourcesDir.appendingPathComponent("TipsData.json")
-            quizURL = resourcesDir.appendingPathComponent("QuizData.json")
-        }
+        // Locate TipsData.json and QuizData.json via ResourceLoader (crash-safe, never calls Bundle.module)
+        let tipsURL = ResourceLoader.url(forResource: "TipsData", withExtension: "json")
+        let quizURL = ResourceLoader.url(forResource: "QuizData", withExtension: "json")
 
         guard let validTipsURL = tipsURL, let validQuizURL = quizURL else {
-            XCTFail("TipsData.json or QuizData.json not found")
+            XCTFail("TipsData.json or QuizData.json not found via ResourceLoader")
             return
         }
 
@@ -302,9 +289,17 @@ final class MusicTheoryEngineTests: XCTestCase {
         XCTAssertNotNil(tipsArray)
         XCTAssertEqual(tipsArray?.count, 32, "TipsData.json must contain 32 masterclass tips")
 
+        let decodedTips = ResourceLoader.decodeJSON([MasterclassTipModel].self, resource: "TipsData")
+        XCTAssertNotNil(decodedTips)
+        XCTAssertEqual(decodedTips?.count, 32, "ResourceLoader.decodeJSON must decode all 32 MasterclassTipModel items")
+
         let quizData = try Data(contentsOf: validQuizURL)
         let quizArray = try JSONSerialization.jsonObject(with: quizData) as? [[String: Any]]
         XCTAssertNotNil(quizArray)
         XCTAssertEqual(quizArray?.count, 12, "QuizData.json must contain 12 quiz questions")
+
+        let decodedQuiz = ResourceLoader.decodeJSON([QuizQuestionModel].self, resource: "QuizData")
+        XCTAssertNotNil(decodedQuiz)
+        XCTAssertEqual(decodedQuiz?.count, 12, "ResourceLoader.decodeJSON must decode all 12 QuizQuestionModel items")
     }
 }

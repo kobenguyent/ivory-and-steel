@@ -179,7 +179,7 @@ public struct MusicianQuizView: View {
             VStack(spacing: 10) {
                 ForEach(Array(q.options.enumerated()), id: \.offset) { idx, option in
                     OptionButton(
-                        label: "\(Character(UnicodeScalar(65 + idx)!)).",
+                        label: "\(Character(UnicodeScalar(65 + (idx % 26)) ?? "A")).",
                         text: option,
                         isSelected: selectedOptionIndex == idx,
                         isSubmitted: isAnswerSubmitted,
@@ -318,19 +318,7 @@ public struct MusicianQuizView: View {
     }
     
     private func loadQuestions() {
-        if let url = Bundle.module.url(forResource: "QuizData", withExtension: "json") ??
-                     Bundle.main.url(forResource: "QuizData", withExtension: "json") {
-            if let data = try? Data(contentsOf: url),
-               let decoded = try? JSONDecoder().decode([QuizQuestionModel].self, from: data) {
-                self.questions = decoded
-                return
-            }
-        }
-        
-        let currentDir = FileManager.default.currentDirectoryPath
-        let fallbackUrl = URL(fileURLWithPath: "\(currentDir)/Resources/QuizData.json")
-        if let data = try? Data(contentsOf: fallbackUrl),
-           let decoded = try? JSONDecoder().decode([QuizQuestionModel].self, from: data) {
+        if let decoded = ResourceLoader.decodeJSON([QuizQuestionModel].self, resource: "QuizData") {
             self.questions = decoded
         }
     }

@@ -62,8 +62,61 @@ public struct AppSettingsRecord: Codable, Sendable, Equatable {
     public var theme: String = "Concert Grand Dark"
     public var metronomeSound: String = "Steinway Woodblock"
     public var practiceGoalMinutesPerDay: Int = 30
+    public var autoCheckForUpdates: Bool = true
+    public var includePrereleases: Bool = false
+    public var skippedReleaseTag: String? = nil
+    public var lastUpdateCheckDate: Date? = nil
     
-    public init() {}
+    public init(
+        audioBufferSize: Int = 256,
+        midiDeviceName: String = "All CoreMIDI Inputs",
+        soundfontModel: String = "Steinway Concert Grand (Acoustic DSP)",
+        theme: String = "Concert Grand Dark",
+        metronomeSound: String = "Steinway Woodblock",
+        practiceGoalMinutesPerDay: Int = 30,
+        autoCheckForUpdates: Bool = true,
+        includePrereleases: Bool = false,
+        skippedReleaseTag: String? = nil,
+        lastUpdateCheckDate: Date? = nil
+    ) {
+        self.audioBufferSize = audioBufferSize
+        self.midiDeviceName = midiDeviceName
+        self.soundfontModel = soundfontModel
+        self.theme = theme
+        self.metronomeSound = metronomeSound
+        self.practiceGoalMinutesPerDay = practiceGoalMinutesPerDay
+        self.autoCheckForUpdates = autoCheckForUpdates
+        self.includePrereleases = includePrereleases
+        self.skippedReleaseTag = skippedReleaseTag
+        self.lastUpdateCheckDate = lastUpdateCheckDate
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case audioBufferSize
+        case midiDeviceName
+        case soundfontModel
+        case theme
+        case metronomeSound
+        case practiceGoalMinutesPerDay
+        case autoCheckForUpdates
+        case includePrereleases
+        case skippedReleaseTag
+        case lastUpdateCheckDate
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.audioBufferSize = try container.decodeIfPresent(Int.self, forKey: .audioBufferSize) ?? 256
+        self.midiDeviceName = try container.decodeIfPresent(String.self, forKey: .midiDeviceName) ?? "All CoreMIDI Inputs"
+        self.soundfontModel = try container.decodeIfPresent(String.self, forKey: .soundfontModel) ?? "Steinway Concert Grand (Acoustic DSP)"
+        self.theme = try container.decodeIfPresent(String.self, forKey: .theme) ?? "Concert Grand Dark"
+        self.metronomeSound = try container.decodeIfPresent(String.self, forKey: .metronomeSound) ?? "Steinway Woodblock"
+        self.practiceGoalMinutesPerDay = try container.decodeIfPresent(Int.self, forKey: .practiceGoalMinutesPerDay) ?? 30
+        self.autoCheckForUpdates = try container.decodeIfPresent(Bool.self, forKey: .autoCheckForUpdates) ?? true
+        self.includePrereleases = try container.decodeIfPresent(Bool.self, forKey: .includePrereleases) ?? false
+        self.skippedReleaseTag = try container.decodeIfPresent(String.self, forKey: .skippedReleaseTag)
+        self.lastUpdateCheckDate = try container.decodeIfPresent(Date.self, forKey: .lastUpdateCheckDate)
+    }
 }
 
 public struct StorageData: Codable, Sendable, Equatable {
@@ -73,6 +126,21 @@ public struct StorageData: Codable, Sendable, Equatable {
     public var settings: AppSettingsRecord = AppSettingsRecord()
     
     public init() {}
+    
+    enum CodingKeys: String, CodingKey {
+        case practiceSessions
+        case quizResults
+        case bookmarkedTipIds
+        case settings
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.practiceSessions = try container.decodeIfPresent([PracticeSessionRecord].self, forKey: .practiceSessions) ?? []
+        self.quizResults = try container.decodeIfPresent([QuizResultRecord].self, forKey: .quizResults) ?? []
+        self.bookmarkedTipIds = try container.decodeIfPresent([String].self, forKey: .bookmarkedTipIds) ?? []
+        self.settings = try container.decodeIfPresent(AppSettingsRecord.self, forKey: .settings) ?? AppSettingsRecord()
+    }
 }
 
 /// Thread-safe storage manager that persists practice routines, quiz scores, bookmarks,
