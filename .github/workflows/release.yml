@@ -1,0 +1,142 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release version tag (e.g. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+        type: string
+      prerelease:
+        description: "Mark as pre-release"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish GitHub Release
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Cache SwiftPM Build Products
+        uses: actions/cache@v4
+        with:
+          path: macos/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('macos/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Resolve Release Version
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW_TAG="${{ inputs.tag }}"
+          else
+            RAW_TAG="${GITHUB_REF_NAME}"
+          fi
+
+          # Ensure tag starts with 'v'
+          if [[ "${RAW_TAG}" != v* ]]; then
+            TAG="v${RAW_TAG}"
+          else
+            TAG="${RAW_TAG}"
+          fi
+          VERSION="${TAG#v}"
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Resolved Release Tag: ${TAG} (Version: ${VERSION})"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Full Test Suite (macOS XCTest + Web Vitest)
+        run: ./macos/scripts/run_tests.sh --all
+
+      - name: Build Web Production Site
+        run: npm run build
+
+      - name: Build Native macOS App, DMG & ZIP Artifacts
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: ./macos/scripts/build_app.sh
+
+      - name: Verify Release Assets
+        run: |
+          test -d "macos/build/IvoryAndSteel.app"
+          codesign --verify --deep --strict --verbose=2 "macos/build/IvoryAndSteel.app"
+          test -f "macos/build/IvoryAndSteel.dmg"
+          test -f "macos/build/IvoryAndSteel.zip"
+          test -f "macos/build/SHA256SUMS.txt"
+          cat "macos/build/SHA256SUMS.txt"
+
+      - name: Upload Release Artifacts to Workflow Run
+        uses: actions/upload-artifact@v4
+        with:
+          name: IvoryAndSteel-${{ steps.meta.outputs.tag }}-macOS
+          path: |
+            macos/build/IvoryAndSteel*.dmg
+            macos/build/IvoryAndSteel*.zip
+            macos/build/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Prepare Release Notes Header
+        run: |
+          cat << 'EOF' > macos/build/RELEASE_HEADER.md
+          ### 📦 Direct Downloads (Native macOS Studio App)
+
+          | Package | Format | Description |
+          | :--- | :--- | :--- |
+          | **`IvoryAndSteel.dmg`** | **macOS Disk Image (Recommended)** | Double-click to mount, then drag **IvoryAndSteel.app** into **Applications** or run the included one-click installer. |
+          | **`IvoryAndSteel.zip`** | **macOS App Archive** | Double-click in Finder to extract **IvoryAndSteel.app** directly. |
+          | **`SHA256SUMS.txt`** | **Checksums** | SHA-256 integrity hashes for all release packages. |
+
+          ---
+
+          ### 🚀 Quick Installation (macOS 14.0+ Sonoma / Sequoia)
+
+          1. Download **`IvoryAndSteel.dmg`** below and double-click to open it.
+          2. **Option A (One-Click Installer):** Double-click **`Install Ivory & Steel (No Apple Dev Account).command`** inside the mounted disk image.
+          3. **Option B (Drag & Drop):** Drag **`IvoryAndSteel.app`** into the **`Applications`** folder shortcut.
+          4. **First Launch (Gatekeeper Note):** Because Ivory & Steel is ad-hoc signed (requiring no paid Apple Developer account), macOS flags browser-downloaded apps with quarantine. Run this command once in Terminal before opening:
+             ```bash
+             xattr -cr /Applications/IvoryAndSteel.app
+             ```
+             *(Or right-click `IvoryAndSteel.app` in Finder → choose **Open** → click **Open**).*
+          EOF
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: "Ivory & Steel ${{ steps.meta.outputs.tag }}"
+          body_path: macos/build/RELEASE_HEADER.md
+          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease == true }}
+          draft: false
+          files: |
+            macos/build/IvoryAndSteel.dmg
+            macos/build/IvoryAndSteel.zip
+            macos/build/IvoryAndSteel-${{ steps.meta.outputs.version }}-macOS-*.dmg
+            macos/build/IvoryAndSteel-${{ steps.meta.outputs.version }}-macOS-*.zip
+            macos/build/SHA256SUMS.txt

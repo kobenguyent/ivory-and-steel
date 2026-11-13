@@ -170,11 +170,37 @@ npm run build
 ```
 Generates static assets in `dist/` configured with relative paths (`./`) for static hosting or GitHub Pages.
 
-### Native macOS Application Bundle (`.app`)
+### Native macOS Application Bundle (`.app`, `.dmg`, `.zip`)
 ```bash
 npm run macos:build
 ```
-Compiles, code-signs, and packages `macos/build/IvoryAndSteel.app` (8.1 MB) with zero external runtime dependencies.
+Compiles, ad-hoc code-signs, and packages:
+- `macos/build/IvoryAndSteel.app` — Standalone native macOS application bundle
+- `macos/build/IvoryAndSteel.dmg` — Apple Disk Image with `/Applications` drag-and-drop shortcut & one-click Gatekeeper-bypass installer (`Install Ivory & Steel (No Apple Dev Account).command`)
+- `macos/build/IvoryAndSteel.zip` — Compressed app bundle preserving resource forks and permissions
+- `macos/build/SHA256SUMS.txt` — SHA-256 checksums for all release artifacts
+
+---
+
+## 🚢 GitHub Actions Workflows & Native App Releases
+
+Ivory & Steel includes three automated GitHub Actions pipelines in `.github/workflows/`:
+
+1. **`ci.yml` — CI & Native macOS Build**
+   - Triggers on every `push` and `pull_request` to `main`/`master` as well as manual `workflow_dispatch`.
+   - Runs all 99 tests (`42 macOS XCTests` + `57 Web Vitest tests`), compiles the native macOS `.app`, packages `.dmg` & `.zip` installers, verifies ad-hoc code signatures, and uploads **`IvoryAndSteel-macOS-DMG`**, **`IvoryAndSteel-macOS-ZIP`**, and **`IvoryAndSteel-macOS-Release`** directly to the workflow run summary for one-click download.
+2. **`release.yml` — Build & Publish GitHub Release**
+   - Triggers automatically when pushing a version tag (`v*`, e.g., `v1.0.0`) or manually via **Actions → Release → Run workflow**.
+   - Stamps the release version into `Info.plist`, runs the full test suite, builds `IvoryAndSteel.dmg`, `IvoryAndSteel.zip`, versioned archives, and `SHA256SUMS.txt`, and publishes a full **GitHub Release** with downloadable native installers and installation instructions.
+3. **`deploy.yml` — Deploy to GitHub Pages**
+   - Automatically tests, builds, and deploys the Web Masterclass SPA to GitHub Pages on pushes to `main`.
+
+### Publishing a New Native Release
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+*(Or trigger manually from GitHub Actions → **Release** → **Run workflow** with your desired version tag).*
 
 ---
 
@@ -182,6 +208,10 @@ Compiles, code-signs, and packages `macos/build/IvoryAndSteel.app` (8.1 MB) with
 
 ```
 ivory-and-steel/
+├── .github/workflows/                 # Automated CI/CD & Native Release Pipelines
+│   ├── ci.yml                         # Continuous macOS + Web testing & DMG/ZIP artifacts
+│   ├── release.yml                    # Automated GitHub Release publisher (.dmg, .zip, SHA256)
+│   └── deploy.yml                     # GitHub Pages web deployment
 ├── macos/                             # Native macOS Desktop App (Swift 6 + SwiftUI)
 │   ├── Package.swift                  # Swift Package Manager manifest
 │   ├── Resources/                     # AppIcon.icns, Info.plist, Entitlements

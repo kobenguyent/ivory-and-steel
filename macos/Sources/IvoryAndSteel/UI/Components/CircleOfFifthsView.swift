@@ -293,172 +293,179 @@ public struct CircleOfFifthsView: View {
     
     private var harmonicTelemetryDeck: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // Key Center Header & Key Signature Badge
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("HARMONIC CENTER")
-                        .font(.system(size: 8.5, weight: .semibold, design: .monospaced))
-                        .foregroundColor(Color.musicianGoldLight.opacity(0.7))
-                        .tracking(1.0)
-                    
-                    Text(currentKey.name)
-                        .font(.system(size: 22, weight: .bold, design: .serif))
-                        .foregroundColor(Color.musicianIvory)
-                }
-                
-                Spacer()
-                
-                Text(currentKey.keySignatureDesc)
-                    .font(.system(size: 9.5, weight: .medium, design: .monospaced))
-                    .foregroundColor(Color.white.opacity(0.6))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color.white.opacity(0.04))
-                    .clipShape(Capsule())
-                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.06), lineWidth: 0.6))
-            }
-            
-            // Primary Functional Cadence (IV -> I -> V) Clean Floating Glass Tiles
-            HStack(spacing: 8) {
-                // Subdominant IV
-                Button(action: { selectKey(subdominantKey.root) }) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("IV")
-                                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                                .foregroundColor(Color.white.opacity(0.6))
-                            Spacer()
-                            Text(subdominantKey.displayRoot)
-                                .font(.system(size: 14, weight: .bold, design: .serif))
-                                .foregroundColor(Color.musicianIvory)
-                        }
-                        
-                        Text("Subdominant")
-                            .font(.system(size: 9.5, weight: .medium))
-                            .foregroundColor(Color.white.opacity(0.8))
-                        
-                        Text("Gentle release")
-                            .font(.system(size: 9, weight: .regular))
-                            .foregroundColor(Color.white.opacity(0.45))
-                    }
-                    .padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white.opacity(0.035))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.8)
-                    )
-                }
-                .buttonStyle(.plain)
-                
-                // Tonic I (Home)
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("I (HOME)")
-                            .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundColor(Color.musicianGoldLight)
-                        Spacer()
-                        Text(currentKey.displayRoot)
-                            .font(.system(size: 14, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianGold)
-                    }
-                    
-                    Text("Tonic Center")
-                        .font(.system(size: 9.5, weight: .semibold))
-                        .foregroundColor(Color.musicianIvory)
-                    
-                    Text("Total stability")
-                        .font(.system(size: 9, weight: .regular))
-                        .foregroundColor(Color.white.opacity(0.45))
-                }
-                .padding(8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.musicianGold.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(Color.musicianGold.opacity(0.3), lineWidth: 0.8)
-                )
-                
-                // Dominant V
-                Button(action: { selectKey(dominantKey.root) }) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("V")
-                                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                                .foregroundColor(Color.white.opacity(0.6))
-                            Spacer()
-                            Text(dominantKey.displayRoot)
-                                .font(.system(size: 14, weight: .bold, design: .serif))
-                                .foregroundColor(Color.musicianIvory)
-                        }
-                        
-                        Text("Dominant")
-                            .font(.system(size: 9.5, weight: .medium))
-                            .foregroundColor(Color.white.opacity(0.8))
-                        
-                        Text("Tension & pull")
-                            .font(.system(size: 9, weight: .regular))
-                            .foregroundColor(Color.white.opacity(0.45))
-                    }
-                    .padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white.opacity(0.035))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.8)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            
-            // Diatonic Major Scale Highway
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text("DIATONIC SCALE TONES:")
-                        .font(.system(size: 8, weight: .semibold, design: .monospaced))
-                        .foregroundColor(Color.white.opacity(0.45))
-                        .tracking(0.6)
-                    
-                    Spacer()
-                    
-                    Text("Rel. Minor: \(currentKey.relativeMinor)")
-                        .font(.system(size: 9, weight: .medium, design: .serif))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 2)
-                        .background(Color.white.opacity(0.04))
-                        .clipShape(Capsule())
-                }
-                
-                HStack(spacing: 5) {
-                    ForEach(Array(currentKey.diatonicNotes.enumerated()), id: \.offset) { idx, note in
-                        Button(action: { onAuditionTone?(note) }) {
-                            HStack(spacing: 2) {
-                                Text("\(idx + 1)")
-                                    .font(.system(size: 7.5, weight: .bold, design: .monospaced))
-                                    .foregroundColor(Color.white.opacity(0.4))
-                                Text(note)
-                                    .font(.system(size: 10.5, weight: .semibold, design: .serif))
-                                    .foregroundColor(Color.musicianIvory)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 5)
-                            .background(Color.white.opacity(0.04))
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
-                            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.white.opacity(0.06), lineWidth: 0.6))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            telemetryHeader
+            functionalCadenceTiles
+            diatonicScaleHighway
         }
         .padding(12)
         .background(Color.white.opacity(0.025))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.white.opacity(0.06), lineWidth: 1))
+    }
+    
+    private var telemetryHeader: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("HARMONIC CENTER")
+                    .font(.system(size: 8.5, weight: .semibold, design: .monospaced))
+                    .foregroundColor(Color.musicianGoldLight.opacity(0.7))
+                    .tracking(1.0)
+                
+                Text(currentKey.name)
+                    .font(.system(size: 22, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+            }
+            
+            Spacer()
+            
+            Text(currentKey.keySignatureDesc)
+                .font(.system(size: 9.5, weight: .medium, design: .monospaced))
+                .foregroundColor(Color.white.opacity(0.6))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.white.opacity(0.04))
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Color.white.opacity(0.06), lineWidth: 0.6))
+        }
+    }
+    
+    private var functionalCadenceTiles: some View {
+        HStack(spacing: 8) {
+            // Subdominant IV
+            Button(action: { selectKey(subdominantKey.root) }) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("IV")
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(Color.white.opacity(0.6))
+                        Spacer()
+                        Text(subdominantKey.displayRoot)
+                            .font(.system(size: 14, weight: .bold, design: .serif))
+                            .foregroundColor(Color.musicianIvory)
+                    }
+                    
+                    Text("Subdominant")
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.8))
+                    
+                    Text("Gentle release")
+                        .font(.system(size: 9, weight: .regular))
+                        .foregroundColor(Color.white.opacity(0.45))
+                }
+                .padding(8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white.opacity(0.035))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.8)
+                )
+            }
+            .buttonStyle(.plain)
+            
+            // Tonic I (Home)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("I (HOME)")
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundColor(Color.musicianGoldLight)
+                    Spacer()
+                    Text(currentKey.displayRoot)
+                        .font(.system(size: 14, weight: .bold, design: .serif))
+                        .foregroundColor(Color.musicianGold)
+                }
+                
+                Text("Tonic Center")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .foregroundColor(Color.musicianIvory)
+                
+                Text("Total stability")
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundColor(Color.white.opacity(0.45))
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.musicianGold.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(Color.musicianGold.opacity(0.3), lineWidth: 0.8)
+            )
+            
+            // Dominant V
+            Button(action: { selectKey(dominantKey.root) }) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("V")
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(Color.white.opacity(0.6))
+                        Spacer()
+                        Text(dominantKey.displayRoot)
+                            .font(.system(size: 14, weight: .bold, design: .serif))
+                            .foregroundColor(Color.musicianIvory)
+                    }
+                    
+                    Text("Dominant")
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.8))
+                    
+                    Text("Tension & pull")
+                        .font(.system(size: 9, weight: .regular))
+                        .foregroundColor(Color.white.opacity(0.45))
+                }
+                .padding(8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white.opacity(0.035))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.8)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+    
+    private var diatonicScaleHighway: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("DIATONIC SCALE TONES:")
+                    .font(.system(size: 8, weight: .semibold, design: .monospaced))
+                    .foregroundColor(Color.white.opacity(0.45))
+                    .tracking(0.6)
+                
+                Spacer()
+                
+                Text("Rel. Minor: \(currentKey.relativeMinor)")
+                    .font(.system(size: 9, weight: .medium, design: .serif))
+                    .foregroundColor(Color.white.opacity(0.6))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(Color.white.opacity(0.04))
+                    .clipShape(Capsule())
+            }
+            
+            HStack(spacing: 5) {
+                ForEach(Array(currentKey.diatonicNotes.enumerated()), id: \.offset) { idx, note in
+                    Button(action: { onAuditionTone?(note) }) {
+                        HStack(spacing: 2) {
+                            Text("\(idx + 1)")
+                                .font(.system(size: 7.5, weight: .bold, design: .monospaced))
+                                .foregroundColor(Color.white.opacity(0.4))
+                            Text(note)
+                                .font(.system(size: 10.5, weight: .semibold, design: .serif))
+                                .foregroundColor(Color.musicianIvory)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 5)
+                        .background(Color.white.opacity(0.04))
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.white.opacity(0.06), lineWidth: 0.6))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
     
     private func selectKey(_ root: String) {

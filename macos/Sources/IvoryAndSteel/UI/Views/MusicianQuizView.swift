@@ -55,205 +55,16 @@ public struct MusicianQuizView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header Bar & Mode Selector
-                HStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Musician Diagnostic & Level Quiz")
-                            .font(.system(size: 15, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianIvory)
-                        
-                        Text("Assess your music theory, ear training, and biomechanical comprehension")
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.gray)
-                    }
-                    
-                    Spacer()
-                    
-                    Picker("Instrument Category", selection: $filterInstrument) {
-                        Text("All Questions").tag("all")
-                        Text("Piano Specialization").tag("piano")
-                        Text("Guitar Specialization").tag("guitar")
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: filterInstrument) { _, _ in
-                        restartQuiz()
-                    }
-                }
-                .padding(16)
-                .background(Color.musicianCard)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
-                )
+                quizHeaderBar
                 
                 if isQuizFinished {
-                    // Result Scorecard
-                    VStack(spacing: 20) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 54))
-                            .foregroundColor(Color.musicianGold)
-                            .shadow(color: Color.musicianGold.opacity(0.5), radius: 10)
-                        
-                        Text("Diagnostic Assessment Completed")
-                            .font(.system(size: 20, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianIvory)
-                        
-                        Text("Assigned Skill Tier: \(levelRating)")
-                            .font(.system(size: 15, weight: .heavy, design: .monospaced))
-                            .foregroundColor(Color.musicianGoldLight)
-                        
-                        Text("Final Score: \(score) of \(activeQuestions.count) (\(Int((Double(score) / Double(max(1, activeQuestions.count))) * 100))%)")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Color.musicianIvory)
-                        
-                        Button(action: restartQuiz) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.counterclockwise")
-                                Text("Retake Diagnostic Quiz")
-                            }
-                            .font(.system(size: 12, weight: .bold))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .foregroundColor(Color.musicianEbony)
-                            .background(Color.musicianGold)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(32)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.musicianCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(Color.musicianGold.opacity(0.3), lineWidth: 1)
-                    )
+                    quizFinishedScorecard
                 } else if let q = currentQuestion {
-                    // Active Question View
-                    VStack(alignment: .leading, spacing: 18) {
-                        // Progress Bar & Question Counter
-                        HStack {
-                            Text("Question \(currentIndex + 1) of \(activeQuestions.count)")
-                                .font(.system(size: 12, weight: .bold, design: .monospaced))
-                                .foregroundColor(Color.musicianGold)
-                            
-                            Spacer()
-                            
-                            Text("Current Score: \(score)")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(Color.gray)
-                        }
-                        
-                        // Question Prompt
-                        Text(q.question)
-                            .font(.system(size: 16, weight: .semibold, design: .serif))
-                            .foregroundColor(Color.musicianIvory)
-                            .lineSpacing(3)
-                        
-                        // Options List
-                        VStack(spacing: 10) {
-                            ForEach(Array(q.options.enumerated()), id: \.offset) { idx, option in
-                                OptionButton(
-                                    label: "\(Character(UnicodeScalar(65 + idx)!)).",
-                                    text: option,
-                                    isSelected: selectedOptionIndex == idx,
-                                    isSubmitted: isAnswerSubmitted,
-                                    isCorrect: idx == q.correctIndex,
-                                    onSelect: {
-                                        guard !isAnswerSubmitted else { return }
-                                        selectedOptionIndex = idx
-                                        submitAnswer(choice: idx, correct: q.correctIndex)
-                                    }
-                                )
-                            }
-                        }
-                        
-                        // Explanation & Next Button
-                        if isAnswerSubmitted {
-                            VStack(alignment: .leading, spacing: 12) {
-                                HStack(alignment: .top, spacing: 8) {
-                                    Image(systemName: selectedOptionIndex == q.correctIndex ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                        .foregroundColor(selectedOptionIndex == q.correctIndex ? Color.subdominantEmerald : Color.steinwayCrimson)
-                                        .font(.system(size: 14))
-                                    
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(selectedOptionIndex == q.correctIndex ? "CORRECT" : "INCORRECT")
-                                            .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                                            .foregroundColor(selectedOptionIndex == q.correctIndex ? Color.subdominantEmerald : Color.steinwayCrimson)
-                                        
-                                        Text(q.explanation)
-                                            .font(.system(size: 11.5))
-                                            .foregroundColor(Color.musicianIvory.opacity(0.9))
-                                            .lineSpacing(2)
-                                    }
-                                }
-                                
-                                HStack {
-                                    Spacer()
-                                    Button(action: nextQuestion) {
-                                        HStack(spacing: 6) {
-                                            Text(currentIndex + 1 < activeQuestions.count ? "Next Question" : "View Results")
-                                            Image(systemName: "arrow.right")
-                                        }
-                                        .font(.system(size: 12, weight: .bold))
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
-                                        .foregroundColor(Color.musicianEbony)
-                                        .background(Color.musicianGold)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(14)
-                            .background(Color.musicianSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                    }
-                    .padding(20)
-                    .background(Color.musicianCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(Color.musicianGold.opacity(0.2), lineWidth: 1)
-                    )
+                    activeQuestionCard(q)
                 }
                 
-                // Past Assessment History
                 if !pastResults.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Past Assessment Results")
-                            .font(.system(size: 13, weight: .bold, design: .serif))
-                            .foregroundColor(Color.musicianIvory)
-                        
-                        ForEach(pastResults.prefix(5)) { res in
-                            HStack {
-                                Image(systemName: "rosette")
-                                    .foregroundColor(Color.musicianGold)
-                                
-                                Text(res.levelName)
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(Color.musicianIvory)
-                                
-                                Spacer()
-                                
-                                Text("\(res.score)/\(res.totalQuestions)")
-                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                    .foregroundColor(Color.musicianGold)
-                                
-                                Text(res.date.formatted(date: .abbreviated, time: .shortened))
-                                    .font(.system(size: 10))
-                                    .foregroundColor(Color.gray)
-                            }
-                            .padding(10)
-                            .background(Color.musicianSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                    }
-                    .padding(16)
-                    .background(Color.musicianCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    pastAssessmentList
                 }
             }
             .padding(20)
@@ -263,6 +74,209 @@ public struct MusicianQuizView: View {
             loadQuestions()
             pastResults = StorageManager.shared.quizResults
         }
+    }
+    
+    private var quizHeaderBar: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Musician Diagnostic & Level Quiz")
+                    .font(.system(size: 15, weight: .bold, design: .serif))
+                    .foregroundColor(Color.musicianIvory)
+                
+                Text("Assess your music theory, ear training, and biomechanical comprehension")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color.gray)
+            }
+            
+            Spacer()
+            
+            Picker("Instrument Category", selection: $filterInstrument) {
+                Text("All Questions").tag("all")
+                Text("Piano Specialization").tag("piano")
+                Text("Guitar Specialization").tag("guitar")
+            }
+            .pickerStyle(.menu)
+            .onChange(of: filterInstrument) { _, _ in
+                restartQuiz()
+            }
+        }
+        .padding(16)
+        .background(Color.musicianCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+        )
+    }
+    
+    private var quizFinishedScorecard: some View {
+        let pct = Int((Double(score) / Double(max(1, activeQuestions.count))) * 100)
+        return VStack(spacing: 20) {
+            Image(systemName: "checkmark.seal.fill")
+                .font(.system(size: 54))
+                .foregroundColor(Color.musicianGold)
+                .shadow(color: Color.musicianGold.opacity(0.5), radius: 10)
+            
+            Text("Diagnostic Assessment Completed")
+                .font(.system(size: 20, weight: .bold, design: .serif))
+                .foregroundColor(Color.musicianIvory)
+            
+            Text("Assigned Skill Tier: \(levelRating)")
+                .font(.system(size: 15, weight: .heavy, design: .monospaced))
+                .foregroundColor(Color.musicianGoldLight)
+            
+            Text("Final Score: \(score) of \(activeQuestions.count) (\(pct)%)")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Color.musicianIvory)
+            
+            Button(action: restartQuiz) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.counterclockwise")
+                    Text("Retake Diagnostic Quiz")
+                }
+                .font(.system(size: 12, weight: .bold))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .foregroundColor(Color.musicianEbony)
+                .background(Color.musicianGold)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity)
+        .background(Color.musicianCard)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.musicianGold.opacity(0.3), lineWidth: 1)
+        )
+    }
+    
+    private func activeQuestionCard(_ q: QuizQuestionModel) -> some View {
+        let isCorrectSelection = (selectedOptionIndex == q.correctIndex)
+        return VStack(alignment: .leading, spacing: 18) {
+            // Progress Bar & Question Counter
+            HStack {
+                Text("Question \(currentIndex + 1) of \(activeQuestions.count)")
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .foregroundColor(Color.musicianGold)
+                
+                Spacer()
+                
+                Text("Current Score: \(score)")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(Color.gray)
+            }
+            
+            // Question Prompt
+            Text(q.question)
+                .font(.system(size: 16, weight: .semibold, design: .serif))
+                .foregroundColor(Color.musicianIvory)
+                .lineSpacing(3)
+            
+            // Options List
+            VStack(spacing: 10) {
+                ForEach(Array(q.options.enumerated()), id: \.offset) { idx, option in
+                    OptionButton(
+                        label: "\(Character(UnicodeScalar(65 + idx)!)).",
+                        text: option,
+                        isSelected: selectedOptionIndex == idx,
+                        isSubmitted: isAnswerSubmitted,
+                        isCorrect: idx == q.correctIndex,
+                        onSelect: {
+                            guard !isAnswerSubmitted else { return }
+                            selectedOptionIndex = idx
+                            submitAnswer(choice: idx, correct: q.correctIndex)
+                        }
+                    )
+                }
+            }
+            
+            // Explanation & Next Button
+            if isAnswerSubmitted {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: isCorrectSelection ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .foregroundColor(isCorrectSelection ? Color.subdominantEmerald : Color.steinwayCrimson)
+                            .font(.system(size: 14))
+                        
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(isCorrectSelection ? "CORRECT" : "INCORRECT")
+                                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                                .foregroundColor(isCorrectSelection ? Color.subdominantEmerald : Color.steinwayCrimson)
+                            
+                            Text(q.explanation)
+                                .font(.system(size: 11.5))
+                                .foregroundColor(Color.musicianIvory.opacity(0.9))
+                                .lineSpacing(2)
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        Button(action: nextQuestion) {
+                            HStack(spacing: 6) {
+                                Text(currentIndex + 1 < activeQuestions.count ? "Next Question" : "View Results")
+                                Image(systemName: "arrow.right")
+                            }
+                            .font(.system(size: 12, weight: .bold))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .foregroundColor(Color.musicianEbony)
+                            .background(Color.musicianGold)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(14)
+                .background(Color.musicianSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+        }
+        .padding(20)
+        .background(Color.musicianCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.musicianGold.opacity(0.2), lineWidth: 1)
+        )
+    }
+    
+    private var pastAssessmentList: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Past Assessment Results")
+                .font(.system(size: 13, weight: .bold, design: .serif))
+                .foregroundColor(Color.musicianIvory)
+            
+            ForEach(pastResults.prefix(5)) { res in
+                HStack {
+                    Image(systemName: "rosette")
+                        .foregroundColor(Color.musicianGold)
+                    
+                    Text(res.levelName)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color.musicianIvory)
+                    
+                    Spacer()
+                    
+                    Text("\(res.score)/\(res.totalQuestions)")
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundColor(Color.musicianGold)
+                    
+                    Text(res.date.formatted(date: .abbreviated, time: .shortened))
+                        .font(.system(size: 10))
+                        .foregroundColor(Color.gray)
+                }
+                .padding(10)
+                .background(Color.musicianSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+        .padding(16)
+        .background(Color.musicianCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
     
     private func submitAnswer(choice: Int, correct: Int) {

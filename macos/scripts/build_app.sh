@@ -10,12 +10,26 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MACOS_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ROOT_DIR="$(cd "${MACOS_DIR}/.." && pwd)"
 BUILD_DIR="${MACOS_DIR}/build"
 APP_NAME="IvoryAndSteel"
 APP_BUNDLE="${BUILD_DIR}/${APP_NAME}.app"
 CONTENTS_DIR="${APP_BUNDLE}/Contents"
 MACOS_BIN_DIR="${CONTENTS_DIR}/MacOS"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
+DMG_STAGING="${BUILD_DIR}/dmg_staging"
+ARCH="$(uname -m)"
+
+# Resolve version from VERSION env var or package.json
+if [ -n "${VERSION:-}" ]; then
+    RAW_VERSION="${VERSION}"
+elif command -v node >/dev/null 2>&1 && [ -f "${ROOT_DIR}/package.json" ]; then
+    RAW_VERSION="$(node -p "require('${ROOT_DIR}/package.json').version" 2>/dev/null || echo "1.0.0")"
+else
+    RAW_VERSION="1.0.0"
+fi
+CLEAN_VERSION="${RAW_VERSION#v}"
+CLEAN_VERSION="${CLEAN_VERSION#V}"
 
 # Terminal Formatting
 BOLD="\033[1m"
@@ -93,6 +107,12 @@ echo ""
 
 # 1. Compile Swift Binary
 echo -e "${BOLD}[1/5] Compiling Swift binary (${BUILD_CONFIG})...${RESET}"
+
+# Auto-detect Xcode developer directory if default CLT lacks Swift macro plugins
+if [ -d "/Applications/Xcode.app/Contents/Developer" ]; then
+    export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+fi
+
 cd "${MACOS_DIR}"
 
 if [ "${BUILD_CONFIG}" = "release" ]; then
@@ -130,6 +150,9 @@ chmod 755 "${MACOS_BIN_DIR}/${APP_NAME}"
 
 if [ -f "${MACOS_DIR}/Resources/Info.plist" ]; then
     cp "${MACOS_DIR}/Resources/Info.plist" "${CONTENTS_DIR}/Info.plist"
+    if [ -n "${CLEAN_VERSION}" ] && [ -x "/usr/libexec/PlistBuddy" ]; then
+        /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${CLEAN_VERSION}" "${CONTENTS_DIR}/Info.plist" || true
+    fi
 else
     echo -e "${RED}[ERROR] Missing Info.plist at ${MACOS_DIR}/Resources/Info.plist${RESET}"
     exit 1
@@ -164,21 +187,62 @@ codesign --verify --deep --strict --verbose=1 "${APP_BUNDLE}" 2>&1 | while read 
 done
 echo -e "  ${GREEN}✓${RESET} Code signature verified successfully (Ad-Hoc, No Dev Account Required)"
 
-# 5. Packaging Distribution Artifacts (.dmg and .zip)
+# 5. Packaging Distribution Artifacts (.dmg, .zip, and SHA256SUMS.txt)
 if [ "${FAST_MODE}" = false ]; then
-    echo -e "${BOLD}[5/5] Generating distribution installers (.dmg and .zip)...${RESET}"
-    rm -f "${BUILD_DIR}/${APP_NAME}.zip" "${BUILD_DIR}/${APP_NAME}.dmg"
-    
-    # Create zip preserving resource forks and permissions
+    echo -e "${BOLD}[5/5] Generating distribution installers (.dmg, .zip, SHA256SUMS.txt)...${RESET}"
+    ZIP_VERSIONED="${BUILD_DIR}/${APP_NAME}-${CLEAN_VERSION}-macOS-${ARCH}.zip"
+    DMG_VERSIONED="${BUILD_DIR}/${APP_NAME}-${CLEAN_VERSION}-macOS-${ARCH}.dmg"
+    rm -f "${BUILD_DIR}/${APP_NAME}.zip" "${BUILD_DIR}/${APP_NAME}.dmg" "${ZIP_VERSIONED}" "${DMG_VERSIONED}" "${BUILD_DIR}/SHA256SUMS.txt"
+
+    # Create zip preserving resource forks, symlinks, and permissions
     ditto -c -k --sequesterRsrc --keepParent "${APP_BUNDLE}" "${BUILD_DIR}/${APP_NAME}.zip"
-    
+    cp "${BUILD_DIR}/${APP_NAME}.zip" "${ZIP_VERSIONED}"
+
+    # Stage DMG with IvoryAndSteel.app + /Applications shortcut + one-click Gatekeeper-bypass installer
+    rm -rf "${DMG_STAGING}"
+    mkdir -p "${DMG_STAGING}"
+    cp -R "${APP_BUNDLE}" "${DMG_STAGING}/${APP_NAME}.app"
+    ln -s /Applications "${DMG_STAGING}/Applications"
+
+    cat > "${DMG_STAGING}/Install Ivory & Steel (No Apple Dev Account).command" <<'INSTALLER_EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
+APP_SRC="${SRC_DIR}/IvoryAndSteel.app"
+if [ -w "/Applications" ]; then
+    DEST_DIR="/Applications"
+else
+    DEST_DIR="${HOME}/Applications"
+    mkdir -p "${DEST_DIR}"
+fi
+DEST_APP="${DEST_DIR}/IvoryAndSteel.app"
+echo "==> Installing Ivory & Steel to ${DEST_APP}"
+rm -rf "${DEST_APP}"
+ditto "${APP_SRC}" "${DEST_APP}"
+echo "==> Removing browser quarantine attribute & applying local ad-hoc signature"
+xattr -cr "${DEST_APP}" 2>/dev/null || true
+codesign --force --deep --sign - "${DEST_APP}" 2>/dev/null || true
+echo "==> Installed! Launching Ivory & Steel..."
+open "${DEST_APP}"
+INSTALLER_EOF
+    chmod +x "${DMG_STAGING}/Install Ivory & Steel (No Apple Dev Account).command"
+
     # Create Apple Disk Image (UDZO)
-    hdiutil create -volname "${APP_NAME}" -srcfolder "${APP_BUNDLE}" -ov -format UDZO "${BUILD_DIR}/${APP_NAME}.dmg" > /dev/null
-    
+    hdiutil create -volname "Ivory & Steel" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${BUILD_DIR}/${APP_NAME}.dmg" > /dev/null
+    cp "${BUILD_DIR}/${APP_NAME}.dmg" "${DMG_VERSIONED}"
+    rm -rf "${DMG_STAGING}"
+
+    # Generate SHA-256 checksums for release verification
+    (
+        cd "${BUILD_DIR}"
+        shasum -a 256 "${APP_NAME}.dmg" "${APP_NAME}.zip" "$(basename "${DMG_VERSIONED}")" "$(basename "${ZIP_VERSIONED}")" > SHA256SUMS.txt
+    )
+
     ZIP_SIZE="$(du -h "${BUILD_DIR}/${APP_NAME}.zip" | cut -f1)"
     DMG_SIZE="$(du -h "${BUILD_DIR}/${APP_NAME}.dmg" | cut -f1)"
     echo -e "  ${GREEN}✓${RESET} Disk Image (.dmg): ${BOLD}${DMG_SIZE}${RESET} ${DIM}(${BUILD_DIR}/${APP_NAME}.dmg)${RESET}"
     echo -e "  ${GREEN}✓${RESET} Zip Archive (.zip): ${BOLD}${ZIP_SIZE}${RESET} ${DIM}(${BUILD_DIR}/${APP_NAME}.zip)${RESET}"
+    echo -e "  ${GREEN}✓${RESET} Checksums:          ${DIM}${BUILD_DIR}/SHA256SUMS.txt${RESET}"
 else
     echo -e "${BOLD}[5/5] Skipping .dmg/.zip creation (--fast mode active)${RESET}"
 fi

@@ -1,0 +1,119 @@
+name: CI & Native macOS Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Test & Package Native macOS App
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Environment Diagnostics
+        run: |
+          echo "=== System Info ==="
+          sw_vers
+          uname -m
+          echo "=== Developer Tools ==="
+          xcode-select -p
+          swift --version
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Cache SwiftPM Build Products
+        uses: actions/cache@v4
+        with:
+          path: macos/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('macos/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Full Test Suite (macOS XCTest + Web Vitest)
+        run: ./macos/scripts/run_tests.sh --all
+
+      - name: Build Web Production Bundle
+        run: npm run build
+
+      - name: Build & Package Native macOS App (.app, .dmg, .zip)
+        run: ./macos/scripts/build_app.sh
+
+      - name: Verify Bundle & Installer Integrity
+        run: |
+          test -d "macos/build/IvoryAndSteel.app"
+          codesign --verify --deep --strict --verbose=2 "macos/build/IvoryAndSteel.app"
+          test -f "macos/build/IvoryAndSteel.dmg"
+          test -f "macos/build/IvoryAndSteel.zip"
+          test -f "macos/build/SHA256SUMS.txt"
+          cat "macos/build/SHA256SUMS.txt"
+          echo "✅ Native macOS application bundle and installers verified!"
+
+      - name: Upload Native macOS DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IvoryAndSteel-macOS-DMG
+          path: macos/build/IvoryAndSteel.dmg
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Native macOS ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IvoryAndSteel-macOS-ZIP
+          path: macos/build/IvoryAndSteel.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Complete macOS Release Bundle (DMG, ZIP & SHA256SUMS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: IvoryAndSteel-macOS-Release
+          path: |
+            macos/build/IvoryAndSteel*.dmg
+            macos/build/IvoryAndSteel*.zip
+            macos/build/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish Build & Installation Summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## 🎹 Ivory & Steel — Native macOS Studio App
+
+          Download the **ad-hoc signed** native macOS application directly from the **Artifacts** section of this workflow run:
+          - **`IvoryAndSteel-macOS-DMG`** — Apple Disk Image (`IvoryAndSteel.dmg`) with drag-to-Applications shortcut and one-click installer
+          - **`IvoryAndSteel-macOS-ZIP`** — Compressed `IvoryAndSteel.app` bundle (`IvoryAndSteel.zip`)
+          - **`IvoryAndSteel-macOS-Release`** — Complete release bundle including versioned packages and `SHA256SUMS.txt`
+
+          ### 🚀 Installing on macOS (No Apple Developer Account Required)
+          1. **Option A (One-Click DMG Installer):** Open `IvoryAndSteel.dmg` and double-click **`Install Ivory & Steel (No Apple Dev Account).command`** (or drag `IvoryAndSteel.app` to `Applications`).
+          2. **Option B (Terminal Gatekeeper Bypass after dragging to `/Applications`):**
+             ```bash
+             xattr -cr /Applications/IvoryAndSteel.app && open /Applications/IvoryAndSteel.app
+             ```
+          EOF
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 🔐 SHA-256 Checksums" >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          cat macos/build/SHA256SUMS.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
